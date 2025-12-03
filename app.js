@@ -1,8 +1,15 @@
-const state = { 
-  selectedPlayer: 1,
-  actions: []
+/* ==========================
+   ESTADO GLOBAL
+========================== */
+const state = {
+  selectedPlayer: null,   // Ninguna al inicio
+  actions: [],
+  stats: {}               // stats[jugadora][grupo][accion] = número
 };
 
+/* ==========================
+   DEFINICIÓN DE GRUPOS / ACCIONES
+========================== */
 const GROUPS = [
   { id:"saque", title:"Saque", buttons:["Pto","Positivo","Neutro","Error"] },
   { id:"defensa", title:"Defensa", buttons:["Perfecta","Positiva","Negativa","Error"] },
@@ -12,21 +19,63 @@ const GROUPS = [
   { id:"ataque", title:"Ataque", buttons:["Punto","Sigue","Bloqueado","Free","Error"] },
 ];
 
-/* ---- RENDER ---- */
+/* ==========================
+   INICIALIZACIÓN
+========================== */
+renderPlayers();
+renderGroups();
+refreshButtons();   // muestra stats si existieran
 
+
+/* ==========================
+   RENDER DE JUGADORAS
+========================== */
 function renderPlayers(){
   const container = document.getElementById("players");
   container.innerHTML = "";
 
-  for(let i=1;i<=6;i++){
+  for (let i=1; i<=6; i++){
     const b = document.createElement("button");
-    b.className = "player-btn" + (state.selectedPlayer===i ? " selected" : "");
+    b.className = "player-btn";
     b.textContent = i;
-    b.onclick = ()=>{ state.selectedPlayer = i; renderPlayers(); };
+    b.dataset.player = i;
+
+    // Si hay jugadora seleccionada:
+    if (state.selectedPlayer !== null){
+      if (state.selectedPlayer == i) {
+        b.classList.add("selected");
+      } else {
+        b.disabled = true;       // bloquear otras jugadoras
+        b.style.opacity = 0.4;
+      }
+    }
+
+    b.onclick = ()=> selectPlayer(i);
     container.appendChild(b);
   }
 }
 
+
+/* ==========================
+   SELECCIONAR JUGADORA
+========================== */
+function selectPlayer(n){
+  // No permitir cambio si ya hay una jugadora seleccionada
+  // (solo se desactiva con "deshacer")
+  if (state.selectedPlayer !== null) return;
+
+  state.selectedPlayer = n;
+
+  // Aseguramos estructura de stats
+  if (!state.stats[n]) state.stats[n] = {};
+
+  renderPlayers();
+}
+
+
+/* ==========================
+   RENDER DE GRUPOS
+========================== */
 function renderGroups(){
   const g = document.getElementById("groups");
   g.innerHTML = "";
@@ -42,8 +91,9 @@ function renderGroups(){
     gr.buttons.forEach(btn=>{
       const b = document.createElement("button");
       b.className = "act-btn";
-      b.textContent = btn;
-      b.onclick = ()=>registerAction(gr.id, btn);
+      b.dataset.group = gr.id;
+      b.dataset.action = btn;
+      b.onclick = ()=> registerAction(gr.id, btn);
       grid.appendChild(b);
     });
 
@@ -52,34 +102,96 @@ function renderGroups(){
   });
 }
 
-/* ---- LÓGICA ---- */
 
+/* ==========================
+   REGISTRAR ACCIÓN
+========================== */
 function registerAction(group, action){
+  if (state.selectedPlayer === null) return; // Nada seleccionado
+
+  const p = state.selectedPlayer;
+
+  // Registrar acción en el historial
   state.actions.push({
-    ts:Date.now(),
-    player: state.selectedPlayer,
+    ts: Date.now(),
+    player: p,
     group,
     action
   });
+
+  // Actualizar estadísticas
+  if (!state.stats[p]) state.stats[p] = {};
+  if (!state.stats[p][group]) state.stats[p][group] = {};
+  if (!state.stats[p][group][action]) state.stats[p][group][action] = 0;
+
+  state.stats[p][group][action]++;
+
+  // Limpiar selección
+  state.selectedPlayer = null;
+
+  renderPlayers();
+  refreshButtons();
 }
 
-/* Botones principales */
 
+/* ==========================
+   DESHACER
+========================== */
 document.getElementById("btn-undo").onclick = ()=>{
-  state.actions.pop();
+
+  // Caso 1: No hay jugadora seleccionada y no hay acciones → nada que hacer
+  if (state.selectedPlayer === null && state.actions.length === 0) return;
+
+  // Caso 2: Jugadora seleccionada pero no se ha registrado acción aún
+  if (state.selectedPlayer !== null && state.actions.length === 0){
+    state.selectedPlayer = null;
+    renderPlayers();
+    return;
+  }
+
+  // Caso 3: Deshacer última acción registrada
+  const last = state.actions.pop();
+  const {player, group, action} = last;
+
+  if (state.stats[player] &&
+      state.stats[player][group] &&
+      state.stats[player][group][action]){
+    state.stats[player][group][action]--;
+    if (state.stats[player][group][action] < 0){
+      state.stats[player][group][action] = 0;
+    }
+  }
+
+  renderPlayers();
+  refreshButtons();
 };
 
 
+/* ==========================
+   REFRESCAR BOTONES (mostrar estadísticas)
+========================== */
+function refreshButtons(){
+  // Todos los botones de acción
+  const buttons = document.querySelectorAll(".act-btn");
 
-  const blob = new Blob([csv],{type:"text/csv"});
-  const url = URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  a.download="stats.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-};
+  buttons.forEach(btn=>{
+    const group = btn.dataset.group;
+    const action = btn.dataset.action;
 
-/* ---- INICIO ---- */
-renderPlayers();
-renderGroups();
+    let total = 0;
+
+    // Sumar todas las jugadoras
+    for (let p in state.stats){
+      if (state.stats[p][group] && state.stats[p][group][action]){
+        total += state.stats[p][group][action];
+      }
+    }
+
+    if (total > 0){
+      btn.textContent = `${action} (${total})`;
+    } else {
+      btn.textContent = action;
+    }
+  });
+}
+
