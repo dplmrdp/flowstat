@@ -69,18 +69,28 @@ html, body {
 /* =========================================
    GRID DE ACCIONES
    ========================================= */
-.groups{
+.groups {
   display:grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
   gap:10px;
 
-  /* ALTURA REAL DEL MÓVIL - AJUSTADA */
+  /* ALTURA AJUSTADA PARA NO CORTAR BOTONES */
   height: calc(100dvh - 110px);
-  max-height: calc(100dvh - 110px)
+  max-height: calc(100dvh - 110px);
 
   overflow:hidden;
 }
+
+/* Optimización para iPhone 12 mini / pantallas pequeñas */
+@media (max-height: 400px) {
+  .groups {
+    gap: 8px;
+    height: calc(100dvh - 120px);
+    max-height: calc(100dvh - 120px);
+  }
+}
+
 
 .group{
   background:white;
