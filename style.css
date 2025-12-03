@@ -1,5 +1,5 @@
 /* =========================================
-   BASE
+   BASE Y CORRECCIONES iOS SAFE AREA
    ========================================= */
 html, body {
   height: 100%;
@@ -8,11 +8,11 @@ html, body {
            env(safe-area-inset-bottom) env(safe-area-inset-left);
   font-family: system-ui, sans-serif;
   background:#eef2f7;
-  overflow:hidden; /* Evita scroll en iOS */
+  overflow:hidden; /* Evita scroll en PWAs */
 }
 
 .app{
-  padding:10px;
+  padding:6px; /* Reducido para móviles pequeños */
 }
 
 /* =========================================
@@ -75,11 +75,11 @@ html, body {
   grid-template-rows: repeat(2, 1fr);
   gap:10px;
 
-  /* 🔥 Ajuste crítico: usar altura REAL visible del móvil */
-  height: calc(100dvh - 150px);
-  max-height: calc(100dvh - 150px);
+  /* ALTURA REAL DEL MÓVIL - AJUSTADA */
+  height: calc(100dvh - 160px);
+  max-height: calc(100dvh - 160px);
 
-  overflow: hidden; /* evita desplazamiento accidental */
+  overflow:hidden;
 }
 
 .group{
@@ -112,10 +112,46 @@ html, body {
 }
 
 /* =========================================
-   FOOTER (si lo vuelves a usar)
+   FOOTER (por si vuelve en el futuro)
    ========================================= */
 .footer{
   margin-top:8px;
   display:flex;
   gap:6px;
+}
+
+/* =========================================
+   OPTIMIZACIÓN PARA PANTALLAS PEQUEÑAS
+   iPhone 12 mini, iPhone SE, Android compactos
+   ========================================= */
+@media (max-height: 400px) {
+
+  .act-btn {
+    min-height: 42px;
+    font-size: 13px;
+  }
+
+  .player-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .action-btn, .icon-btn {
+    height: 44px;
+  }
+
+  .group .title {
+    font-size: 14px;
+  }
+
+  .groups {
+    gap: 8px;
+    height: calc(100dvh - 150px);
+    max-height: calc(100dvh - 150px);
+  }
+
+  .app {
+    padding: 4px;
+  }
 }
