@@ -134,37 +134,42 @@ function registerAction(group, action){
 }
 
 
-/* ==========================
-   DESHACER
-========================== */
+// ==========================
+//     DESHACER
+// ==========================
 document.getElementById("btn-undo").onclick = ()=>{
 
-  // Caso 1: No hay jugadora seleccionada y no hay acciones → nada que hacer
-  if (state.selectedPlayer === null && state.actions.length === 0) return;
-
-  // Caso 2: Jugadora seleccionada pero no se ha registrado acción aún
-  if (state.selectedPlayer !== null && state.actions.length === 0){
-    state.selectedPlayer = null;
-    renderPlayers();
-    return;
+  // CASO A:
+  // Hay una jugadora seleccionada y NO hemos registrado acción
+  if (state.selectedPlayer !== null) {
+    state.selectedPlayer = null;   // quitar selección
+    renderPlayers();               // habilitar todas
+    return;                        // NO tocar historial
   }
 
-  // Caso 3: Deshacer última acción registrada
+  // CASO B:
+  // Sí hay historial → deshacer última acción
+  if (state.actions.length === 0) return;
+
   const last = state.actions.pop();
   const {player, group, action} = last;
 
+  // Restar estadísticas
   if (state.stats[player] &&
       state.stats[player][group] &&
       state.stats[player][group][action]){
+
     state.stats[player][group][action]--;
-    if (state.stats[player][group][action] < 0){
+
+    if (state.stats[player][group][action] < 0) {
       state.stats[player][group][action] = 0;
     }
   }
 
-  renderPlayers();
   refreshButtons();
+  renderPlayers();
 };
+
 
 
 /* ==========================
