@@ -69,15 +69,7 @@ document.getElementById("btn-undo").onclick = ()=>{
   state.actions.pop();
 };
 
-document.getElementById("btn-clear").onclick = ()=>{
-  if(confirm("¿Borrar datos?")) state.actions = [];
-};
 
-document.getElementById("btn-export").onclick = ()=>{
-  let csv = "timestamp,player,group,action\n";
-  state.actions.forEach(a=>{
-    csv += `${a.ts},${a.player},${a.group},${a.action}\n`;
-  });
 
   const blob = new Blob([csv],{type:"text/csv"});
   const url = URL.createObjectURL(blob);
