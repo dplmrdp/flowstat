@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flowstat-cache-v1';
+const CACHE_NAME = 'flowstat-cache-v2';
 const urlsToCache = [
   '/flowstat/',
   '/flowstat/index.html',
