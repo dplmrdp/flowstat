@@ -1,15 +1,23 @@
-body {
-  margin:0;
+/* =========================================
+   BASE
+   ========================================= */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
   font-family: system-ui, sans-serif;
   background:#eef2f7;
-  overflow:hidden;
+  overflow:hidden; /* Evita scroll en iOS */
 }
 
 .app{
   padding:10px;
 }
 
-/* FILA SUPERIOR */
+/* =========================================
+   FILA SUPERIOR
+   ========================================= */
 .top-row{
   display:flex;
   align-items:center;
@@ -24,7 +32,7 @@ body {
 }
 
 .player-btn{
-  width:50px;height:50px;
+  width:50px; height:50px;
   background:white;
   border-radius:8px;
   border:2px solid #ccc;
@@ -49,8 +57,7 @@ body {
 }
 
 .icon-btn{
-  width:46px;
-  height:46px;
+  width:46px; height:46px;
   background:white;
   border-radius:8px;
   border:1px solid #ccc;
@@ -59,20 +66,26 @@ body {
   align-items:center;
 }
 
-/* GRID DE ACCIONES */
+/* =========================================
+   GRID DE ACCIONES
+   ========================================= */
 .groups{
   display:grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
   gap:10px;
-  height: calc(100vh - 150px);
+
+  /* 🔥 Ajuste crítico: usar altura REAL visible del móvil */
+  height: calc(100dvh - 150px);
+  max-height: calc(100dvh - 150px);
+
+  overflow: hidden; /* evita desplazamiento accidental */
 }
 
 .group{
   background:white;
   border-radius:10px;
   padding:8px;
-  overflow:hidden;
   display:flex;
   flex-direction:column;
 }
@@ -98,7 +111,9 @@ body {
   font-size:14px;
 }
 
-/* FOOTER */
+/* =========================================
+   FOOTER (si lo vuelves a usar)
+   ========================================= */
 .footer{
   margin-top:8px;
   display:flex;
