@@ -42,13 +42,16 @@ FS.jugadoras.renderLista = function () {
     `;
 
     div.innerHTML = `
-      <strong>#${j.dorsal}</strong> ${j.nombre}<br>
-      <small>Equipos: ${etiquetaEquipos || "—"}</small><br><br>
+  <strong>${j.alias}</strong> (${j.nombre})<br>
+  Dorsal: ${j.dorsal || "—"}<br>
+  Posición: ${j.posicion || "—"}<br>
+  <small>Equipos: ${etiquetaEquipos || "—"}</small><br><br>
 
-      <button onclick="FS.jugadoras.edit('${id}')">✏ Editar</button>
-      <button onclick="FS.jugadoras.asignarEquipos('${id}')">👥 Asignar equipos</button>
-      <button onclick="FS.jugadoras.borrar('${id}')">🗑 Borrar</button>
-    `;
+  <button onclick="FS.jugadoras.edit('${id}')">✏ Editar</button>
+  <button onclick="FS.jugadoras.asignarEquipos('${id}')">👥 Equipos</button>
+  <button onclick="FS.jugadoras.borrar('${id}')">🗑 Borrar</button>
+`;
+
 
     cont.appendChild(div);
   });
