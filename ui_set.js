@@ -70,7 +70,7 @@ FS.sets.renderJugadoras = function () {
     b.className = "player-btn";
 
     // texto del botón
-    b.textContent = `#${j.dorsal}`;
+    b.textContent = `${j.alias}`;
 
     // si hay undoPending, bloquear todo excepto jugadora de esa acción
     if (undo) {
