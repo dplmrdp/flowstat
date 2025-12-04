@@ -1,14 +1,14 @@
 /* ============================================================
-   STORAGE — Capa de persistencia (Local + Online híbrido)
+   STORAGE — Persistencia local + hook para Firestore
    ============================================================ */
 
 window.FS = window.FS || {};
 
 FS.storage = {
 
-  /* ----------------------------------------
-     LOCAL STORAGE
-     ---------------------------------------- */
+  /* ===========================
+     GUARDAR TODO EN LOCAL
+     =========================== */
 
   guardarTodo() {
     localStorage.setItem("flowstat_data", JSON.stringify({
@@ -18,45 +18,38 @@ FS.storage = {
     }));
   },
 
+  /* ===========================
+     CARGAR TODO
+     =========================== */
+
   cargarTodo() {
     const raw = localStorage.getItem("flowstat_data");
     if (!raw) return;
 
-    const data = JSON.parse(raw);
+    const d = JSON.parse(raw);
 
-    FS.state.jugadoras = data.jugadoras || {};
-    FS.state.equipos = data.equipos || {};
-    FS.state.partidos = data.partidos || {};
+    FS.state.jugadoras = d.jugadoras || {};
+    FS.state.equipos = d.equipos || {};
+    FS.state.partidos = d.partidos || {};
   },
 
-  backupSetEnCurso() {
-    const partido = FS.state.partidos[FS.state.partidoActivo];
+  /* ===========================
+     BACKUP SET EN CURSO
+     =========================== */
+
+  backupSet() {
+    const partido = FS.state.par​​tidos[FS.state.partidoActivo];
     if (!partido) return;
 
     localStorage.setItem("flowstat_partido_activo", JSON.stringify(partido));
   },
 
-  borrarTodo() {
-    localStorage.removeItem("flowstat_data");
-  },
+  /* ===========================
+     FIRESTORE (PENDIENTE)
+     =========================== */
 
-
-  /* ----------------------------------------
-     FIRESTORE (Opciones híbridas)
-     ---------------------------------------- */
-
-  async subirSetAFirestore(idPartido, setData) {
-    // ← Aquí conectaremos Firestore con:
-    //    - firebase.initializeApp()
-    //    - import de firestore
-    //    - sets en:
-    //    /partidos/{idPartido}/sets/{setN}/acciones
-
-    console.log("🔥 (pendiente) SUBIR A FIRESTORE:", idPartido, setData);
-  },
-
-  async subirPartidoCompleto(idPartido) {
-    const partido = FS.state.partidos[idPartido];
-    console.log("🔥 (pendiente) subir partido entero:", partido);
+  async subirSet(partidoId, setNumero, acciones) {
+    console.log("🔥 Subir a Firestore:", partidoId, setNumero, acciones);
+    // Aquí irá la escritura real
   }
 };
