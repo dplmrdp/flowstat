@@ -156,11 +156,12 @@ FS.equipos.editarJugadoras = function (idEquipo) {
   Object.values(jug).forEach(j => {
     const checked = eq.jugadoras.includes(j.id) ? "checked" : "";
     opciones += `
-      <label>
-        <input type="checkbox" class="chk-jug" value="${j.id}" ${checked}>
-        ${j.alias} (#${j.dorsal||"–"})
-      </label><br>
-    `;
+  <label class="jug-opt">
+    <span>${j.alias} (#${j.dorsal||"–"})</span>
+    <input type="checkbox" class="chk-jug" value="${j.id}" ${checked}>
+  </label>
+`;
+
   });
 
   const form = `
