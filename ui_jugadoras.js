@@ -60,17 +60,35 @@ FS.jugadoras.renderLista = function () {
    ============================================================ */
 
 FS.jugadoras.create = function () {
-  const nombre = prompt("Nombre de la jugadora:");
+
+  const nombre = prompt("Nombre completo:");
   if (!nombre) return;
 
-  const dorsal = prompt("Dorsal:");
-  if (!dorsal) return;
+  let alias = prompt("Alias (máx. 7 caracteres):");
+  if (!alias) {
+    alert("Debes introducir un alias.");
+    return;
+  }
+  alias = alias.slice(0,7); // limitar longitud
 
-  const nuevaId = FS.state.crearJugadora(nombre, dorsal);
+  const dorsal = prompt("Dorsal (opcional):") || "";
+
+  const posicion = prompt(
+    "Posición (por defecto):\n" +
+    "colocadora / opuesta / central / punta / libero"
+  ) || "";
+
+  const id = FS.state.crearJugadora(
+    nombre,
+    alias,
+    dorsal,
+    posicion
+  );
 
   FS.storage.guardarTodo();
   FS.jugadoras.renderLista();
 };
+
 
 
 /* ============================================================
