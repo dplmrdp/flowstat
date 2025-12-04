@@ -97,20 +97,30 @@ FS.jugadoras.create = function () {
 
 FS.jugadoras.edit = function (idJugadora) {
   const j = FS.state.jugadoras[idJugadora];
-  if (!j) return;
 
-  const nuevoNombre = prompt("Editar nombre:", j.nombre);
+  const nuevoNombre = prompt("Nombre completo:", j.nombre);
   if (!nuevoNombre) return;
 
-  const nuevoDorsal = prompt("Editar dorsal:", j.dorsal);
-  if (!nuevoDorsal) return;
+  let nuevoAlias = prompt("Alias (máx. 7 caracteres):", j.alias);
+  if (!nuevoAlias) return;
+  nuevoAlias = nuevoAlias.slice(0,7);
+
+  const nuevoDorsal = prompt("Dorsal (opcional):", j.dorsal);
+
+  const nuevaPos = prompt(
+    "Posición (colocadora, opuesta, central, punta, libero):",
+    j.posicion
+  );
 
   j.nombre = nuevoNombre;
+  j.alias = nuevoAlias;
   j.dorsal = nuevoDorsal;
+  j.posicion = nuevaPos;
 
   FS.storage.guardarTodo();
   FS.jugadoras.renderLista();
 };
+
 
 
 /* ============================================================
