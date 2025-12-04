@@ -1,6 +1,5 @@
 /* ============================================================
-   ui_partidos.js
-   Gestión de partidos para FlowStat (SPA)
+   ui_partidos.js — Gestión de Partidos (con campeonato y temporada)
    ============================================================ */
 
 window.FS = window.FS || {};
@@ -8,7 +7,7 @@ FS.partidos = {};
 
 
 /* ============================================================
-   RENDER DE LISTA DE PARTIDOS
+   LISTA DE PARTIDOS
    ============================================================ */
 
 FS.partidos.renderLista = function () {
@@ -28,8 +27,7 @@ FS.partidos.renderLista = function () {
   ids.forEach(id => {
     const p = partidos[id];
 
-    const equipoLocal = equipos[p.equipoPropio]?.nombre || "(Equipo desconocido)";
-    const categoria = p.categoria || "—";
+    const eqPropio = equipos[p.equipoPropio]?.nombre || "(Equipo desconocido)";
 
     const div = document.createElement("div");
     div.className = "partido-item";
@@ -42,8 +40,10 @@ FS.partidos.renderLista = function () {
     `;
 
     div.innerHTML = `
-      <strong>${equipoLocal}</strong> vs <strong>${p.equipoRival}</strong><br>
-      <small>${p.fecha} — ${categoria}</small>
+      <strong>${eqPropio}</strong> vs <strong>${p.equipoRival}</strong><br>
+      <small>Fecha: ${p.fecha}</small><br>
+      <small>Temporada: ${p.temporada}</small><br>
+      <small>Campeonato: ${p.campeonato}</small>
       <br><br>
 
       <button onclick="FS.partidos.entrarPartido('${id}')">▶ Entrar</button>
@@ -66,7 +66,7 @@ FS.partidos.create = function () {
   let opts = "";
 
   Object.values(equipos).forEach(eq => {
-    opts += `<option value="${eq.id}">${eq.nombre}</option>`;
+    opts += `<option value="${eq.id}">${eq.nombre} (${eq.temporada})</option>`;
   });
 
   const hoy = new Date().toISOString().slice(0,10);
@@ -74,16 +74,16 @@ FS.partidos.create = function () {
   const form = `
     <h3>Nuevo partido</h3>
 
-    <label>Equipo propio:</label>
+    <label>Equipo propio</label>
     <select id="fp-equipo">${opts}</select>
 
-    <label>Equipo rival:</label>
-    <input id="fp-rival" type="text" />
+    <label>Equipo rival</label>
+    <input id="fp-rival" type="text">
 
-    <label>Fecha:</label>
-    <input id="fp-fecha" type="date" value="${hoy}" />
+    <label>Fecha</label>
+    <input id="fp-fecha" type="date" value="${hoy}">
 
-    <label>Categoría:</label>
+    <label>Categoría</label>
     <select id="fp-cat">
       <option value=""></option>
       <option value="Benjamín">Benjamín</option>
@@ -94,7 +94,13 @@ FS.partidos.create = function () {
       <option value="Senior">Senior</option>
     </select>
 
-    <br><br>
+    <label>Temporada</label>
+    <input id="fp-temp" type="text" placeholder="Ej: 25/26">
+
+    <label>Campeonato</label>
+    <input id="fp-camp" type="text" placeholder="Ej: Liga Municipal">
+
+    <br>
     <button onclick="FS.partidos.submitCreate()">Guardar</button>
     <button onclick="FS.modal.close()">Cancelar</button>
   `;
@@ -103,67 +109,66 @@ FS.partidos.create = function () {
 };
 
 FS.partidos.submitCreate = function () {
-  const equipoPropio = document.getElementById("fp-equipo").value;
-  const rival = document.getElementById("fp-rival").value;
+  const eq = document.getElementById("fp-equipo").value;
+  const rival = document.getElementById("fp-rival").value.trim();
   const fecha = document.getElementById("fp-fecha").value;
   const categoria = document.getElementById("fp-cat").value;
+  const temporada = document.getElementById("fp-temp").value.trim();
+  const campeonato = document.getElementById("fp-camp").value.trim();
 
-  FS.state.crearPartido(equipoPropio, rival, fecha, categoria);
+  if (!eq || !rival || !temporada) {
+    alert("Equipo propio, rival y temporada son obligatorios.");
+    return;
+  }
+
+  FS.state.crearPartido(eq, rival, fecha, categoria, temporada, campeonato);
+
   FS.storage.guardarTodo();
   FS.modal.close();
   FS.partidos.renderLista();
 };
 
 
-
 /* ============================================================
-   ENTRAR EN PARTIDO (COMENZAR SET 1)
+   ENTRAR AL PARTIDO (Set 1)
    ============================================================ */
 
 FS.partidos.entrarPartido = function (idPartido) {
   FS.state.iniciarPartido(idPartido);
 
-  // Iniciamos set 1 si no existe todavía
-  const partido = FS.state.partidos[idPartido];
+  const p = FS.state.partidos[idPartido];
 
-  if (partido.sets.length === 0) {
+  if (p.sets.length === 0) {
     FS.state.iniciarSet(1);
   }
 
-  // Al entrar, cargamos jugadoras del equipo propio
-  const equipo = FS.state.equipos[partido.equipoPropio];
+  const eq = FS.state.equipos[p.equipoPropio];
+  FS.sets.cargarJugadorasEquipo(eq);
 
-  FS.sets.cargarJugadorasEquipo(equipo);
-
-  // Mostrar set en vista SPA
   document.getElementById("titulo-set").textContent =
-    `Set ${FS.state.setActivo} — ${equipo.nombre}`;
+    `Set ${FS.state.setActivo} — ${eq.nombre}`;
 
   FS.router.go("set");
-
-  // Activar interfaz de toma de datos
-  FS.sets.onEnter();
 };
 
 
 /* ============================================================
-   MOSTRAR DETALLES DE PARTIDO (SETS)
+   DETALLES DE PARTIDO
    ============================================================ */
 
 FS.partidos.detalles = function (idPartido) {
   const p = FS.state.partidos[idPartido];
 
-  let msg = `Partido:\n${p.fecha}\n${p.categoria}\n\n`;
+  let msg = `Partido:\n${p.fecha}\n${p.campeonato}\n${p.temporada}\n\n`;
   msg += `${FS.state.equipos[p.equipoPropio]?.nombre} vs ${p.equipoRival}\n\n`;
 
   if (p.sets.length === 0) {
-    msg += "No hay sets registrados.";
-    alert(msg);
+    alert(msg + "Sin sets registrados.");
     return;
   }
 
   p.sets.forEach(set => {
-    msg += `Set ${set.numero}: ${set.acciones.length} acciones registradas\n`;
+    msg += `Set ${set.numero}: ${set.acciones.length} acciones\n`;
   });
 
   alert(msg);
@@ -185,7 +190,7 @@ FS.partidos.borrar = function (idPartido) {
 
 
 /* ============================================================
-   HOOK — SE EJECUTA AL ENTRAR A LA VISTA
+   HOOK DE ENTRADA
    ============================================================ */
 
 FS.partidos.onEnter = function () {
