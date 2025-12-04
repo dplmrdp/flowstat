@@ -329,41 +329,50 @@ html, body {
 #modal-content button:last-of-type {
   background: #ccc;
 }
-/* Opciones de jugadoras en modal de equipos */
-.jug-opt {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 16px;
+/* =========================
+   Opciones de jugadoras (alinear checkbox a la derecha)
+   Coloca este bloque AL FINAL de style.css
+   ========================= */
+label.jug-opt {
+  display: flex !important;           /* forzar fila */
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 12px;
   padding: 6px 0;
+  font-size: 15px;
   border-bottom: 1px solid #eee;
+  box-sizing: border-box;
+  width: 100%;
 }
 
-.jug-opt:last-child {
+/* último elemento sin línea inferior */
+label.jug-opt:last-child {
   border-bottom: none;
 }
 
-.jug-opt input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-}
-.jug-opt {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 0;
-  font-size: 16px;
-  border-bottom: 1px solid #eee;
+/* texto (alias + dorsal) ocupa el espacio disponible */
+label.jug-opt > span {
+  display: inline-block;
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
 }
 
-.jug-opt:last-child {
-  border-bottom: none;
-}
-
-.jug-opt input[type="checkbox"] {
+/* checkbox a la derecha, tamaño mayor para dedo */
+label.jug-opt > input[type="checkbox"] {
+  flex: 0 0 auto;
   width: 20px;
   height: 20px;
+  margin: 0;
+  accent-color: #0077ff; /* color del cuadro/tick en navegadores que lo soporten */
 }
+
+/* evitar que reglas globales de label hagan saltos */
+label.jug-opt br { display: none !important; }
+
 
 .hidden { display:none; }
 
