@@ -58,16 +58,42 @@ FS.equipos.renderLista = function () {
    ============================================================ */
 
 FS.equipos.create = function () {
-  const nombre = prompt("Nombre del equipo:");
-  if (!nombre) return;
 
-  const categoria = prompt("Categoría (ej: Cadete, Infantil, Senior):") || "";
+  const form = `
+    <h3>Nuevo equipo</h3>
 
-  const teamId = FS.state.crearEquipo(nombre, categoria);
+    <label>Nombre del equipo</label>
+    <input id="fe-nombre" type="text" />
+
+    <label>Categoría</label>
+    <select id="fe-cat">
+      <option value="Benjamín">Benjamín</option>
+      <option value="Alevín">Alevín</option>
+      <option value="Infantil">Infantil</option>
+      <option value="Cadete">Cadete</option>
+      <option value="Juvenil">Juvenil</option>
+      <option value="Senior">Senior</option>
+    </select>
+
+    <br><br>
+    <button onclick="FS.equipos.submitCreate()">Guardar</button>
+    <button onclick="FS.modal.close()">Cancelar</button>
+  `;
+
+  FS.modal.open(form);
+};
+
+FS.equipos.submitCreate = function () {
+  const nombre = document.getElementById("fe-nombre").value;
+  const categoria = document.getElementById("fe-cat").value;
+
+  const id = FS.state.crearEquipo(nombre, categoria);
 
   FS.storage.guardarTodo();
+  FS.modal.close();
   FS.equipos.renderLista();
 };
+
 
 
 /* ============================================================
