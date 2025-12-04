@@ -176,8 +176,8 @@ html, body {
   border-color: #74e38a;
 }
 
-.player-btn.líbero,
-.player-btn.libero { /* permitimos ambas grafías */
+/* Líbero: permitir "líbero" → "libero" */
+.player-btn.libero {
   background: #fff59f;
   border-color: #e1cf32;
 }
@@ -186,3 +186,4 @@ html, body {
   background: #d6e2ff;
   border-color: #8aa7ff;
 }
+
