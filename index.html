@@ -1,57 +1,167 @@
 <!doctype html>
 <html lang="es">
+
 <head>
-<meta charset="utf-8" />
+  <meta charset="utf-8" />
 
-<!-- Viewport optimizado para móviles y PWAs -->
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <!-- =========================================
+       VIEWPORT OPTIMIZADO PARA PWA
+       ========================================= -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1,
+                 user-scalable=no, viewport-fit=cover">
 
-<title>FlowStat</title>
+  <title>FlowStat</title>
 
-<!-- Estilos -->
-<link rel="stylesheet" href="style.css">
+  <!-- =========================================
+       PWA MANIFEST / ICONOS / SERVICE WORKER
+       ========================================= -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-<!-- Manifest (PWA) -->
-<link rel="manifest" href="manifest.json">
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
 
-<!-- iOS PWA fullscreen -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-
-<!-- Registrar Service Worker -->
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
-
+  <!-- =========================================
+       ESTILOS PRINCIPALES
+       ========================================= -->
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="app">
+<!-- =========================================================
+     APLICACIÓN (SPA)
+     Cada sección es una pantalla distinta.
+     Solo una está visible en un momento dado.
+     Se muestra/oculta dinámicamente desde app.js
+========================================================= -->
 
-  <!-- =====================================
-       FILA SUPERIOR: Jugadoras + Acciones
-       ===================================== -->
-  <div class="top-row">
+<div id="app" class="app">
 
-    <div class="players" id="players"></div>
+  <!-- =====================================================
+       VISTA: INICIO
+       Comentario:
+       - Pantalla principal de navegación
+       - Desde aquí saltamos a Partidos, Equipos o Jugadoras
+  ====================================================== -->
+  <section id="view-home" class="view active">
+    <h1>FlowStat</h1>
 
-    <button class="action-btn" id="btn-change">Cambio</button>
-    <button class="action-btn" id="btn-finish">Fin set</button>
-    <button class="icon-btn" id="btn-undo">↺</button>
+    <div class="menu-buttons">
+      <button class="menu-btn" onclick="FS.router.go('partidos')">PARTIDOS</button>
+      <button class="menu-btn" onclick="FS.router.go('equipos')">EQUIPOS</button>
+      <button class="menu-btn" onclick="FS.router.go('jugadoras')">JUGADOR@S</button>
+    </div>
+  </section>
 
-  </div>
 
-  <!-- =====================================
-       GRID DE ACCIONES
-       ===================================== -->
-  <div class="groups" id="groups"></div>
+  <!-- =====================================================
+       VISTA: PARTIDOS
+       Comentario:
+       - Lista de partidos guardados
+       - Crear nuevo partido
+       - Entrar a sets / toma de datos
+  ====================================================== -->
+  <section id="view-partidos" class="view hidden">
+
+    <h2>Partidos</h2>
+
+    <button onclick="FS.partidos.create()">➕ Crear partido</button>
+
+    <div id="lista-partidos"></div>
+
+    <button class="back-btn" onclick="FS.router.go('home')">← Volver</button>
+
+  </section>
+
+
+  <!-- =====================================================
+       VISTA: EQUIPOS
+       Comentario:
+       - Lista de equipos
+       - Crear equipo
+       - Añadir/quitar jugadoras
+  ====================================================== -->
+  <section id="view-equipos" class="view hidden">
+
+    <h2>Equipos</h2>
+
+    <button onclick="FS.equipos.create()">➕ Crear equipo</button>
+
+    <div id="lista-equipos"></div>
+
+    <button class="back-btn" onclick="FS.router.go('home')">← Volver</button>
+
+  </section>
+
+
+  <!-- =====================================================
+       VISTA: JUGADORAS
+       Comentario:
+       - Registro de jugadoras
+       - Asignación a equipos
+       - Edición / borrado
+  ====================================================== -->
+  <section id="view-jugadoras" class="view hidden">
+
+    <h2>Jugadoras</h2>
+
+    <button onclick="FS.jugadoras.create()">➕ Crear jugadora</button>
+
+    <div id="lista-jugadoras"></div>
+
+    <button class="back-btn" onclick="FS.router.go('home')">← Volver</button>
+
+  </section>
+
+
+  <!-- =====================================================
+       VISTA: TOMA DE DATOS DEL SET
+       Comentario:
+       - Esta es la vista que ya tienes implementada
+       - La moveremos aquí como módulo independiente
+  ====================================================== -->
+  <section id="view-set" class="view hidden">
+
+    <h2 id="titulo-set">Set</h2>
+
+    <!-- FILA SUPERIOR -->
+    <div class="top-row">
+      <div class="players" id="players"></div>
+
+      <button class="action-btn" id="btn-change">Cambio</button>
+      <button class="action-btn" id="btn-finish">Fin set</button>
+      <button class="icon-btn" id="btn-undo">↺</button>
+    </div>
+
+    <!-- GRID DE ACCIONES -->
+    <div class="groups" id="groups"></div>
+
+    <!-- Botón volver -->
+    <button class="back-btn" onclick="FS.sets.exitSet()">← Terminar set</button>
+
+  </section>
 
 </div>
 
-<!-- Lógica principal -->
+<!-- =========================================================
+     ARCHIVOS DE LÓGICA (MÓDULOS SPA)
+========================================================= -->
+
+<script src="router.js"></script>
+<script src="state.js"></script>
+<script src="storage.js"></script>
+<script src="ui_partidos.js"></script>
+<script src="ui_equipos.js"></script>
+<script src="ui_jugadoras.js"></script>
+<script src="ui_set.js"></script>
+
 <script src="app.js"></script>
 
 </body>
