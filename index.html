@@ -2,48 +2,57 @@
 <html lang="es">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>Stats Vóley — App</title>
 
-<link rel="stylesheet" href="style.css" />
-  
-<!-- PWA manifest -->
+<!-- Viewport optimizado para móviles y PWAs -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
+<title>FlowStat</title>
+
+<!-- Estilos -->
+<link rel="stylesheet" href="style.css">
+
+<!-- Manifest (PWA) -->
 <link rel="manifest" href="manifest.json">
 
-<!-- iOS mode fullscreen -->
+<!-- iOS PWA fullscreen -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-
-<!-- Icono iOS -->
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-<!-- Service Worker -->
+<!-- Registrar Service Worker -->
 <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js');
-  }
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
 </script>
 
-  
 </head>
-<link rel="apple-touch-icon" href="icons/icon-192.png">
 <body>
+
 <div class="app">
 
+  <!-- =====================================
+       FILA SUPERIOR: Jugadoras + Acciones
+       ===================================== -->
   <div class="top-row">
+
     <div class="players" id="players"></div>
 
     <button class="action-btn" id="btn-change">Cambio</button>
     <button class="action-btn" id="btn-finish">Fin set</button>
     <button class="icon-btn" id="btn-undo">↺</button>
+
   </div>
 
+  <!-- =====================================
+       GRID DE ACCIONES
+       ===================================== -->
   <div class="groups" id="groups"></div>
-
-
 
 </div>
 
+<!-- Lógica principal -->
 <script src="app.js"></script>
+
 </body>
 </html>
