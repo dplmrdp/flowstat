@@ -157,3 +157,32 @@ html, body {
   display: block;
 }
 
+/* ===============================
+   Colores por posición
+   =============================== */
+
+.player-btn.colocadora {
+  background: #ffe9cc;
+  border-color: #ffb86b;
+}
+
+.player-btn.opuesta {
+  background: #ffd1d1;
+  border-color: #ff8a8a;
+}
+
+.player-btn.central {
+  background: #d1ffd8;
+  border-color: #74e38a;
+}
+
+.player-btn.líbero,
+.player-btn.libero { /* permitimos ambas grafías */
+  background: #fff59f;
+  border-color: #e1cf32;
+}
+
+.player-btn.receptora {
+  background: #d6e2ff;
+  border-color: #8aa7ff;
+}
