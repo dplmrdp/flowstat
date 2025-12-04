@@ -64,18 +64,25 @@ FS.jugadoras.renderLista = function () {
 
 FS.jugadoras.create = function () {
 
-  const form = `
-    <h3>Nueva jugadora</h3>
+ const form = `
+  <h3>Nueva jugadora</h3>
 
+  <div class="field">
     <label>Nombre completo</label>
     <input id="fj-nombre" type="text" />
+  </div>
 
+  <div class="field">
     <label>Alias (máx 7 chars)</label>
     <input id="fj-alias" type="text" maxlength="7" />
+  </div>
 
+  <div class="field">
     <label>Dorsal (opcional)</label>
     <input id="fj-dorsal" type="number" min="0" />
+  </div>
 
+  <div class="field">
     <label>Posición</label>
     <select id="fj-pos">
       <option value="colocadora">Colocadora</option>
@@ -84,11 +91,12 @@ FS.jugadoras.create = function () {
       <option value="líbero">Líbero</option>
       <option value="receptora">Receptora</option>
     </select>
+  </div>
 
-    <br><br>
-    <button onclick="FS.jugadoras.submitCreate()">Guardar</button>
-    <button onclick="FS.modal.close()">Cancelar</button>
-  `;
+  <button onclick="FS.jugadoras.submitCreate()">Guardar</button>
+  <button onclick="FS.modal.close()">Cancelar</button>
+`;
+
 
   FS.modal.open(form);
 };
