@@ -237,3 +237,42 @@ label.jug-opt input[type="checkbox"] {
   flex:0 0 auto;
   accent-color:#0077ff;
 }
+/* =========================================
+   Forzar visibilidad del alias de jugadora
+   ========================================= */
+
+label.jug-opt {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-height: 28px !important;
+  padding: 4px 0 !important;
+  border-bottom: 1px solid #eee !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+label.jug-opt span {
+  display: block !important;
+  flex: 1 1 auto !important;
+  font-size: 16px !important;
+  line-height: 20px !important;
+  color: #000 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  text-indent: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: auto !important;
+  max-width: 100% !important;
+}
+
+label.jug-opt input[type="checkbox"] {
+  flex: 0 0 auto !important;
+  width: 22px !important;
+  height: 22px !important;
+  margin-left: 8px !important;
+  transform: none !important;
+}
