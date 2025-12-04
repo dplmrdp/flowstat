@@ -1,125 +1,131 @@
 /* ============================================================
-   STATE — Estructura de datos en memoria
-   Aquí vive el "estado vivo" de la app.
+   STATE — Modelo de datos en memoria para FlowStat
+   Versión completa con temporada y campeonato
    ============================================================ */
 
 window.FS = window.FS || {};
 
 FS.state = {
 
-  /* ----------------------------------------
-     LISTAS MAESTRAS
-     ---------------------------------------- */
-
-  jugadoras: {},   // clave jugadoraId → objeto jugadora
-  equipos: {},     // clave equipoId → objeto equipo
-  partidos: {},    // clave partidoId → objeto partido
-
-  /* ----------------------------------------
-     PARTIDO Y SET EN CURSO
-     ---------------------------------------- */
-
-  partidoActivo: null,    // id del partido actual
-  setActivo: null,        // número del set actual
-
   /* ========================================
-     CREACIÓN DE ENTIDADES
+     ENTIDADES PRINCIPALES
      ======================================== */
 
-  crearJugadora(nombre, alias, dorsal = "", posicion = "", equipos = []) {
-  const id = "j_" + crypto.randomUUID();
+  jugadoras: {},   // j_id → { ... }
+  equipos: {},     // t_id → { ... }
+  partidos: {},    // p_id → { ... }
 
-  FS.state.jugadoras[id] = {
-    id,
-    nombre,
-    alias,       // nuevo campo
-    dorsal,      // opcional
-    posicion,    // nuevo campo
-    equipos: [...equipos]
-  };
+  partidoActivo: null,
+  setActivo: null,
 
-  return id;
-},
 
-  crearEquipo(nombre, categoria = "") {
+  /* ========================================
+     JUGADORAS
+     ======================================== */
+
+  crearJugadora(nombre, alias, dorsal, posicion) {
+    const id = "j_" + crypto.randomUUID();
+
+    FS.state.jugadoras[id] = {
+      id,
+      nombre,
+      alias,
+      dorsal,
+      posicion,
+      equipos: []
+    };
+
+    return id;
+  },
+
+
+  /* ========================================
+     EQUIPOS
+     ======================================== */
+
+  crearEquipo(nombre, categoria, temporada) {
     const id = "t_" + crypto.randomUUID();
 
     FS.state.equipos[id] = {
       id,
       nombre,
       categoria,
-      jugadoras: []  // lista de IDs de jugadoras
+      temporada,
+      jugadoras: []
     };
 
     return id;
   },
 
-  crearPartido(equipoPropio, equipoRival, fecha, categoria) {
+  equipoAñadirJugadora(idEquipo, idJugadora) {
+    const e = FS.state.equipos[idEquipo];
+    const j = FS.state.jugadoras[idJugadora];
+
+    if (!e.jugadoras.includes(idJugadora))
+      e.jugadoras.push(idJugadora);
+
+    if (!j.equipos.includes(idEquipo))
+      j.equipos.push(idEquipo);
+  },
+
+  equipoQuitarJugadora(idEquipo, idJugadora) {
+    FS.state.equipos[idEquipo].jugadoras =
+      FS.state.equipos[idEquipo].jugadoras.filter(x => x !== idJugadora);
+
+    FS.state.jugadoras[idJugadora].equipos =
+      FS.state.jugadoras[idJugadora].equipos.filter(x => x !== idEquipo);
+  },
+
+
+  /* ========================================
+     PARTIDOS
+     ======================================== */
+
+  crearPartido(equipoPropio, rival, fecha, categoria, temporada, campeonato) {
     const id = "p_" + crypto.randomUUID();
 
     FS.state.partidos[id] = {
       id,
-      fecha,
       equipoPropio,
-      equipoRival,
+      equipoRival: rival,
+      fecha,
       categoria,
+      temporada,
+      campeonato,
       sets: []
     };
 
     return id;
   },
 
-  /* ========================================
-     GESTIÓN DE EQUIPOS
-     ======================================== */
-
-  equipoAñadirJugadora(idEquipo, idJugadora) {
-    const equipo = FS.state.equipos[idEquipo];
-    if (!equipo.jugadoras.includes(idJugadora)) {
-      equipo.jugadoras.push(idJugadora);
-    }
-
-    // sincronizar jugadora → equipos
-    const jug = FS.state.jugadoras[idJugadora];
-    if (!jug.equipos.includes(idEquipo)) {
-      jug.equipos.push(idEquipo);
-    }
-  },
-
-  equipoQuitarJugadora(idEquipo, idJugadora) {
-    const equipo = FS.state.equipos[idEquipo];
-    equipo.jugadoras = equipo.jugadoras.filter(j => j !== idJugadora);
-
-    const jug = FS.state.jugadoras[idJugadora];
-    jug.equipos = jug.equipos.filter(e => e !== idEquipo);
-  },
-
-  /* ========================================
-     GESTIÓN DE PARTIDO Y SET
-     ======================================== */
-
   iniciarPartido(idPartido) {
     FS.state.partidoActivo = idPartido;
   },
 
-  iniciarSet(numero) {
-    FS.state.setActivo = numero;
 
+  /* ========================================
+     SETS Y ACCIONES
+     ======================================== */
+
+  iniciarSet(numero) {
     const partido = FS.state.partidos[FS.state.partidoActivo];
+
     partido.sets[numero - 1] = {
       numero,
-      acciones: [],
-      finalizado: false
+      finalizado: false,
+      acciones: []
     };
+
+    FS.state.setActivo = numero;
   },
 
-  registrarAccion(jugadoraId, grupo, accion) {
+  registrarAccion(jugadora, grupo, accion) {
     const partido = FS.state.partidos[FS.state.partidoActivo];
     const set = partido.sets[FS.state.setActivo - 1];
 
     set.acciones.push({
       ts: Date.now(),
-      jugadora: jugadoraId,
+      jugadora,
       grupo,
       accion
     });
