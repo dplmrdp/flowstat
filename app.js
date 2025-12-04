@@ -1,15 +1,15 @@
-/* ==========================
+/* =========================================
    ESTADO GLOBAL
-========================== */
+========================================= */
 const state = {
-  selectedPlayer: null,   // Ninguna al inicio
+  selectedPlayer: null,
   actions: [],
-  stats: {}               // stats[jugadora][grupo][accion] = número
+  stats: {}
 };
 
-/* ==========================
-   DEFINICIÓN DE GRUPOS / ACCIONES
-========================== */
+/* =========================================
+   DEFINICIÓN DE GRUPOS
+========================================= */
 const GROUPS = [
   { id:"saque", title:"Saque", buttons:["Pto","Positivo","Neutro","Error"] },
   { id:"defensa", title:"Defensa", buttons:["Perfecta","Positiva","Negativa","Error"] },
@@ -19,17 +19,17 @@ const GROUPS = [
   { id:"ataque", title:"Ataque", buttons:["Punto","Sigue","Bloqueado","Free","Error"] },
 ];
 
-/* ==========================
-   INICIALIZACIÓN
-========================== */
+/* =========================================
+   INIT
+========================================= */
 renderPlayers();
 renderGroups();
-refreshButtons();   // muestra stats si existieran
+refreshButtons();
+ajustarAlturaGrid();
 
-
-/* ==========================
+/* =========================================
    RENDER DE JUGADORAS
-========================== */
+========================================= */
 function renderPlayers(){
   const container = document.getElementById("players");
   container.innerHTML = "";
@@ -40,12 +40,11 @@ function renderPlayers(){
     b.textContent = i;
     b.dataset.player = i;
 
-    // Si hay jugadora seleccionada:
     if (state.selectedPlayer !== null){
       if (state.selectedPlayer == i) {
         b.classList.add("selected");
       } else {
-        b.disabled = true;       // bloquear otras jugadoras
+        b.disabled = true;
         b.style.opacity = 0.4;
       }
     }
@@ -55,27 +54,22 @@ function renderPlayers(){
   }
 }
 
-
-/* ==========================
+/* =========================================
    SELECCIONAR JUGADORA
-========================== */
+========================================= */
 function selectPlayer(n){
-  // No permitir cambio si ya hay una jugadora seleccionada
-  // (solo se desactiva con "deshacer")
   if (state.selectedPlayer !== null) return;
 
   state.selectedPlayer = n;
 
-  // Aseguramos estructura de stats
   if (!state.stats[n]) state.stats[n] = {};
 
   renderPlayers();
 }
 
-
-/* ==========================
+/* =========================================
    RENDER DE GRUPOS
-========================== */
+========================================= */
 function renderGroups(){
   const g = document.getElementById("groups");
   g.innerHTML = "";
@@ -102,16 +96,14 @@ function renderGroups(){
   });
 }
 
-
-/* ==========================
+/* =========================================
    REGISTRAR ACCIÓN
-========================== */
+========================================= */
 function registerAction(group, action){
-  if (state.selectedPlayer === null) return; // Nada seleccionado
+  if (state.selectedPlayer === null) return;
 
   const p = state.selectedPlayer;
 
-  // Registrar acción en el historial
   state.actions.push({
     ts: Date.now(),
     player: p,
@@ -119,64 +111,51 @@ function registerAction(group, action){
     action
   });
 
-  // Actualizar estadísticas
   if (!state.stats[p]) state.stats[p] = {};
   if (!state.stats[p][group]) state.stats[p][group] = {};
   if (!state.stats[p][group][action]) state.stats[p][group][action] = 0;
 
   state.stats[p][group][action]++;
 
-  // Limpiar selección
   state.selectedPlayer = null;
 
   renderPlayers();
   refreshButtons();
 }
 
-
-// ==========================
-//     DESHACER
-// ==========================
+/* =========================================
+   DESHACER
+========================================= */
 document.getElementById("btn-undo").onclick = ()=>{
 
-  // CASO A:
-  // Hay una jugadora seleccionada y NO hemos registrado acción
+  // Si hay jugadora seleccionada pero no acción → solo cancelar selección
   if (state.selectedPlayer !== null) {
-    state.selectedPlayer = null;   // quitar selección
-    renderPlayers();               // habilitar todas
-    return;                        // NO tocar historial
+    state.selectedPlayer = null;
+    renderPlayers();
+    return;
   }
 
-  // CASO B:
-  // Sí hay historial → deshacer última acción
   if (state.actions.length === 0) return;
 
   const last = state.actions.pop();
   const {player, group, action} = last;
 
-  // Restar estadísticas
   if (state.stats[player] &&
       state.stats[player][group] &&
       state.stats[player][group][action]){
-
     state.stats[player][group][action]--;
-
-    if (state.stats[player][group][action] < 0) {
+    if (state.stats[player][group][action] < 0)
       state.stats[player][group][action] = 0;
-    }
   }
 
   refreshButtons();
   renderPlayers();
 };
 
-
-
-/* ==========================
-   REFRESCAR BOTONES (mostrar estadísticas)
-========================== */
+/* =========================================
+   REFRESCAR BOTONES CON ESTADÍSTICAS
+========================================= */
 function refreshButtons(){
-  // Todos los botones de acción
   const buttons = document.querySelectorAll(".act-btn");
 
   buttons.forEach(btn=>{
@@ -185,9 +164,9 @@ function refreshButtons(){
 
     let total = 0;
 
-    // Sumar todas las jugadoras
     for (let p in state.stats){
-      if (state.stats[p][group] && state.stats[p][group][action]){
+      if (state.stats[p][group] &&
+          state.stats[p][group][action]){
         total += state.stats[p][group][action];
       }
     }
@@ -200,3 +179,25 @@ function refreshButtons(){
   });
 }
 
+/* =========================================
+   AJUSTE DINÁMICO DE ALTURA PARA IPHONE
+========================================= */
+function ajustarAlturaGrid() {
+  const topRow = document.querySelector(".top-row");
+  const groups = document.querySelector(".groups");
+
+  if (!topRow || !groups) return;
+
+  const topH = topRow.offsetHeight;
+  const safeBottom = parseFloat(getComputedStyle(document.documentElement)
+                      .getPropertyValue('padding-bottom')) || 0;
+
+  const available = window.innerHeight - topH - safeBottom - 10;
+
+  groups.style.height = available + "px";
+  groups.style.maxHeight = available + "px";
+}
+
+window.addEventListener("resize", ajustarAlturaGrid);
+window.addEventListener("orientationchange", ajustarAlturaGrid);
+window.addEventListener("load", ajustarAlturaGrid);
