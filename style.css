@@ -203,6 +203,54 @@ html, body {
   width: 90%;
   max-width: 400px;
 }
+/* =========================================
+   ESTILOS DEL MODAL PARA FORMULARIOS
+   ========================================= */
+
+#modal-content h3 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+#modal-content label {
+  display: block;
+  font-size: 16px;      /* letra más grande */
+  margin: 10px 0 4px;   /* separación entre label y campo */
+}
+
+#modal-content input,
+#modal-content select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;      /* letra más grande */
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 10px;  /* separación entre campos */
+  box-sizing: border-box;
+}
+
+#modal-content button {
+  padding: 10px 16px;
+  font-size: 16px;       /* letra más grande */
+  margin-right: 8px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #e0e0e0;
+}
+
+#modal-content button:hover {
+  background: #d4d4d4;
+}
+
+#modal-content button:first-of-type {
+  background: #4caf50;   /* botón Guardar en verde */
+  color: white;
+}
+
+#modal-content button:first-of-type:hover {
+  background: #3e9442;
+}
 
 .hidden { display:none; }
 
