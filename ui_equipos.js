@@ -149,57 +149,49 @@ FS.equipos.verJugadoras = function (idEquipo) {
 
 FS.equipos.editarJugadoras = function (idEquipo) {
   const eq = FS.state.equipos[idEquipo];
-  const jugadoras = FS.state.jugadoras;
+  const jug = FS.state.jugadoras;
 
-  const idsJug = Object.keys(jugadoras);
+  let opciones = "";
 
-  if (idsJug.length === 0) {
-    alert("No hay jugadoras creadas todavía.");
-    return;
-  }
-
-  let msg = `Asignar jugadoras a ${eq.nombre}:\n\n`;
-
-  idsJug.forEach((jid, idx) => {
-    const j = jugadoras[jid];
-    const asignada = eq.jugadoras.includes(jid) ? "✔" : "✖";
-    msg += `${idx + 1}. #${j.dorsal} ${j.nombre} [${asignada}]\n`;
+  Object.values(jug).forEach(j => {
+    const checked = eq.jugadoras.includes(j.id) ? "checked" : "";
+    opciones += `
+      <label>
+        <input type="checkbox" class="chk-jug" value="${j.id}" ${checked}>
+        ${j.alias} (#${j.dorsal||"–"})
+      </label><br>
+    `;
   });
 
-  msg += "\nIntroduce los números de las jugadoras asignadas (ej: 1,3,4):";
+  const form = `
+    <h3>Jugadoras de ${eq.nombre}</h3>
+    ${opciones}
+    <br>
+    <button onclick="FS.equipos.submitAsignarJugadoras('${idEquipo}')">Guardar</button>
+    <button onclick="FS.modal.close()">Cancelar</button>
+  `;
 
-  const selec = prompt(msg);
-  if (!selec) return;
+  FS.modal.open(form);
+}
 
-  const nums = selec.split(",").map(n => parseInt(n.trim()));
+FS.equipos.submitAsignarJugadoras = function (idEquipo) {
+  const checks = document.querySelectorAll(".chk-jug");
+  const eq = FS.state.equipos[idEquipo];
 
-  const nuevas = [];
+  eq.jugadoras = [];
 
-  nums.forEach(n => {
-    const jid = idsJug[n - 1];
-    if (jid) nuevas.push(jid);
-  });
+  checks.forEach(c => {
+    if (c.checked) {
+      eq.jugadoras.push(c.value);
 
-  /* 
-     Sincronizar asignación:
-     - Equipo ← Jugadoras
-     - Jugadoras ← Equipo
-  */
-  eq.jugadoras = nuevas;
-
-  nuevas.forEach(jid => {
-    const j = FS.state.jugadoras[jid];
-    if (!j.equipos.includes(idEquipo)) j.equipos.push(idEquipo);
-  });
-
-  idsJug.forEach(jid => {
-    if (!nuevas.includes(jid)) {
-      const j = FS.state.jugadoras[jid];
-      j.equipos = j.equipos.filter(eid => eid !== idEquipo);
+      // actualizar jugadora → equipos
+      const j = FS.state.jugadoras[c.value];
+      if (!j.equipos.includes(idEquipo)) j.equipos.push(idEquipo);
     }
   });
 
   FS.storage.guardarTodo();
+  FS.modal.close();
   FS.equipos.renderLista();
 };
 
