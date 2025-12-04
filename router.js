@@ -1,7 +1,6 @@
 /* ============================================================
-   ROUTER — Controlador de vistas del SPA
-   FS.router.go("home")  → muestra view-home
-   FS.router.go("partidos") → view-partidos
+   ROUTER – Controlador de vistas del SPA FlowStat
+   Cambia pantallas y ejecuta hooks onEnter
    ============================================================ */
 
 window.FS = window.FS || {};
@@ -13,14 +12,29 @@ FS.router = {
   go(viewName) {
 
     // Ocultar vista actual
-    const previous = document.getElementById(`view-${this.currentView}`);
-    if (previous) previous.classList.add("hidden");
+    const prev = document.getElementById(`view-${this.currentView}`);
+    if (prev) prev.classList.add("hidden");
 
     // Mostrar nueva vista
     const next = document.getElementById(`view-${viewName}`);
     if (next) next.classList.remove("hidden");
 
     this.currentView = viewName;
-  }
 
+    // ==============================
+    // Ejecutar hook de entrada
+    // ==============================
+
+    if (viewName === "jugadoras" && FS.jugadoras.onEnter)
+      FS.jugadoras.onEnter();
+
+    if (viewName === "equipos" && FS.equipos.onEnter)
+      FS.equipos.onEnter();
+
+    if (viewName === "partidos" && FS.partidos.onEnter)
+      FS.partidos.onEnter();
+
+    if (viewName === "set" && FS.sets.onEnter)
+      FS.sets.onEnter();
+  }
 };
