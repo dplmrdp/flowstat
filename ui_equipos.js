@@ -54,7 +54,7 @@ FS.equipos.renderLista = function () {
 
 
 /* ============================================================
-   CREAR EQUIPO
+   CREAR EQUIPO (modal)
    ============================================================ */
 
 FS.equipos.create = function () {
@@ -75,7 +75,7 @@ FS.equipos.create = function () {
       <option value="Senior">Senior</option>
     </select>
 
-    <br><br>
+    <br>
     <button onclick="FS.equipos.submitCreate()">Guardar</button>
     <button onclick="FS.modal.close()">Cancelar</button>
   `;
@@ -95,31 +95,51 @@ FS.equipos.submitCreate = function () {
 };
 
 
-
 /* ============================================================
-   EDITAR EQUIPO (nombre/categoría)
+   EDITAR EQUIPO
    ============================================================ */
 
 FS.equipos.editar = function (idEquipo) {
   const eq = FS.state.equipos[idEquipo];
-  if (!eq) return;
 
-  const nuevoNombre = prompt("Nuevo nombre del equipo:", eq.nombre);
-  if (!nuevoNombre) return;
+  const form = `
+    <h3>Editar equipo</h3>
 
-  const nuevaCategoria = prompt("Categoría:", eq.categoria);
-  if (nuevaCategoria == null) return;
+    <label>Nombre</label>
+    <input id="fe-nombre" type="text" value="${eq.nombre}" />
 
-  eq.nombre = nuevoNombre;
-  eq.categoria = nuevaCategoria;
+    <label>Categoría</label>
+    <select id="fe-cat">
+      <option ${eq.categoria==="Benjamín"?"selected":""} value="Benjamín">Benjamín</option>
+      <option ${eq.categoria==="Alevín"?"selected":""} value="Alevín">Alevín</option>
+      <option ${eq.categoria==="Infantil"?"selected":""} value="Infantil">Infantil</option>
+      <option ${eq.categoria==="Cadete"?"selected":""} value="Cadete">Cadete</option>
+      <option ${eq.categoria==="Juvenil"?"selected":""} value="Juvenil">Juvenil</option>
+      <option ${eq.categoria==="Senior"?"selected":""} value="Senior">Senior</option>
+    </select>
+
+    <br>
+    <button onclick="FS.equipos.submitEdit('${idEquipo}')">Guardar</button>
+    <button onclick="FS.modal.close()">Cancelar</button>
+  `;
+
+  FS.modal.open(form);
+};
+
+FS.equipos.submitEdit = function (idEquipo) {
+  const eq = FS.state.equipos[idEquipo];
+
+  eq.nombre = document.getElementById("fe-nombre").value;
+  eq.categoria = document.getElementById("fe-cat").value;
 
   FS.storage.guardarTodo();
+  FS.modal.close();
   FS.equipos.renderLista();
 };
 
 
 /* ============================================================
-   VER JUGADORAS DE UN EQUIPO (solo lectura)
+   VER LISTA DE JUGADORAS DEL EQUIPO
    ============================================================ */
 
 FS.equipos.verJugadoras = function (idEquipo) {
@@ -135,7 +155,7 @@ FS.equipos.verJugadoras = function (idEquipo) {
 
   eq.jugadoras.forEach(jid => {
     const j = jugadoras[jid];
-    msg += `#${j.dorsal} - ${j.nombre}\n`;
+    msg += `${j.alias} (#${j.dorsal || "-"})\n`;
   });
 
   alert(msg);
@@ -143,8 +163,8 @@ FS.equipos.verJugadoras = function (idEquipo) {
 
 
 /* ============================================================
-   GESTIONAR JUGADORAS DE UN EQUIPO
-   (asignar y quitar jugadoras ya creadas)
+   GESTIÓN DE JUGADORAS DEL EQUIPO
+   (checkbox a la derecha)
    ============================================================ */
 
 FS.equipos.editarJugadoras = function (idEquipo) {
@@ -156,24 +176,25 @@ FS.equipos.editarJugadoras = function (idEquipo) {
   Object.values(jug).forEach(j => {
     const checked = eq.jugadoras.includes(j.id) ? "checked" : "";
     opciones += `
-  <label class="jug-opt">
-    <span>${j.alias} (#${j.dorsal||"–"})</span>
-    <input type="checkbox" class="chk-jug" value="${j.id}" ${checked}>
-  </label>
-`;
-
+      <label class="jug-opt">
+        <span>${j.alias} (#${j.dorsal || "–"})</span>
+        <input type="checkbox" class="chk-jug" value="${j.id}" ${checked}>
+      </label>
+    `;
   });
 
   const form = `
     <h3>Jugadoras de ${eq.nombre}</h3>
+
     ${opciones}
+
     <br>
     <button onclick="FS.equipos.submitAsignarJugadoras('${idEquipo}')">Guardar</button>
     <button onclick="FS.modal.close()">Cancelar</button>
   `;
 
   FS.modal.open(form);
-}
+};
 
 FS.equipos.submitAsignarJugadoras = function (idEquipo) {
   const checks = document.querySelectorAll(".chk-jug");
@@ -205,7 +226,7 @@ FS.equipos.borrar = function (idEquipo) {
   const eq = FS.state.equipos[idEquipo];
   if (!confirm(`¿Eliminar el equipo ${eq.nombre}?`)) return;
 
-  // Eliminar referencias en jugadoras
+  // eliminar referencias en jugadoras
   for (const jid in FS.state.jugadoras) {
     const j = FS.state.jugadoras[jid];
     j.equipos = j.equipos.filter(eid => eid !== idEquipo);
@@ -219,7 +240,7 @@ FS.equipos.borrar = function (idEquipo) {
 
 
 /* ============================================================
-   HOOK — SE EJECUTA AL ENTRAR A LA VISTA
+   HOOK: se ejecuta al entrar en la vista
    ============================================================ */
 
 FS.equipos.onEnter = function () {
