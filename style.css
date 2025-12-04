@@ -347,6 +347,23 @@ html, body {
   width: 20px;
   height: 20px;
 }
+.jug-opt {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.jug-opt:last-child {
+  border-bottom: none;
+}
+
+.jug-opt input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
 
 .hidden { display:none; }
 
