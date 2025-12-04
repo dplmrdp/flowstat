@@ -297,18 +297,18 @@ html, body {
   display: block;
   font-size: 16px;
   font-weight: 600;
-  margin: 12px 0 4px;
+  margin: 6px 0 2px;
 }
 
 #modal-content input,
 #modal-content select {
   width: 100%;
   box-sizing: border-box;
-  padding: 10px;
+  padding: 8px;
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   background: #fafafa;
 }
 
