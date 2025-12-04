@@ -204,52 +204,92 @@ html, body {
   max-width: 400px;
 }
 /* =========================================
-   ESTILOS DEL MODAL PARA FORMULARIOS
-   ========================================= */
-
-#modal-content h3 {
-  font-size: 20px;
-  margin-bottom: 15px;
+   MODAL – FONDO
+========================================= */
+#modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
 
+#modal-bg:not(.hidden) {
+  display: flex;
+}
+
+/* =========================================
+   MODAL – CONTENIDO
+========================================= */
+#modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+}
+
+/* TITULITOS DEL MODAL */
+#modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 20px;
+  text-align: center;
+}
+
+/* =========================================
+   FORMULARIOS EN EL MODAL
+========================================= */
 #modal-content label {
-  display: block;
-  font-size: 16px;      /* letra más grande */
-  margin: 10px 0 4px;   /* separación entre label y campo */
+  display: block;          /* <-- Esto pone cada label en línea propia */
+  margin-top: 12px;
+  margin-bottom: 4px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 #modal-content input,
 #modal-content select {
-  width: 100%;
+  width: 100%;             /* <-- Este es el punto clave */
+  box-sizing: border-box;
   padding: 10px;
-  font-size: 16px;      /* letra más grande */
+  font-size: 16px;         /* <-- letra más grande */
   border: 1px solid #ccc;
   border-radius: 6px;
-  margin-bottom: 10px;  /* separación entre campos */
-  box-sizing: border-box;
+  margin-bottom: 8px;      /* separación entre campos */
+  background: #fdfdfd;
 }
 
+/* =========================================
+   BOTONES DEL MODAL
+========================================= */
 #modal-content button {
-  padding: 10px 16px;
-  font-size: 16px;       /* letra más grande */
-  margin-right: 8px;
-  margin-top: 10px;
+  font-size: 16px;
+  padding: 10px 14px;
   border-radius: 8px;
   border: none;
-  background: #e0e0e0;
-}
-
-#modal-content button:hover {
-  background: #d4d4d4;
+  margin-right: 8px;
+  margin-top: 10px;
 }
 
 #modal-content button:first-of-type {
-  background: #4caf50;   /* botón Guardar en verde */
+  background: #4caf50;   /* Guardar */
   color: white;
 }
 
 #modal-content button:first-of-type:hover {
-  background: #3e9442;
+  background: #449b47;
+}
+
+#modal-content button:last-of-type {
+  background: #ddd;      /* Cancelar */
+}
+
+#modal-content button:last-of-type:hover {
+  background: #c8c8c8;
 }
 
 .hidden { display:none; }
