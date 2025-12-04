@@ -69,6 +69,13 @@ FS.sets.renderJugadoras = function () {
     const b = document.createElement("button");
     b.className = "player-btn";
 
+     // Añadir clase de posición
+if (j.posicion) {
+    const clase = j.posicion.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    // esto convierte "líbero" → "libero"
+    b.classList.add(clase);
+}
+
     // texto del botón
     b.textContent = `${j.alias}`;
 
