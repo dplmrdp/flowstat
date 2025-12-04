@@ -329,6 +329,24 @@ html, body {
 #modal-content button:last-of-type {
   background: #ccc;
 }
+/* Opciones de jugadoras en modal de equipos */
+.jug-opt {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.jug-opt:last-child {
+  border-bottom: none;
+}
+
+.jug-opt input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
 
 .hidden { display:none; }
 
