@@ -62,58 +62,58 @@ FS.partidos.renderLista = function () {
 
 FS.partidos.create = function () {
 
-  /* -------------------------------
-     Selección de equipo propio
-     ------------------------------- */
   const equipos = FS.state.equipos;
-  const ids = Object.keys(equipos);
+  let opts = "";
 
-  if (ids.length === 0) {
-    alert("Debes crear primero un equipo.");
-    return;
-  }
-
-  let mensaje = "Selecciona el equipo propio:\n\n";
-  ids.forEach((eid, i) => {
-    mensaje += `${i+1}. ${equipos[eid].nombre}\n`;
+  Object.values(equipos).forEach(eq => {
+    opts += `<option value="${eq.id}">${eq.nombre}</option>`;
   });
 
-  const seleccion = prompt(mensaje);
-  if (!seleccion) return;
+  const hoy = new Date().toISOString().slice(0,10);
 
-  const idx = parseInt(seleccion) - 1;
-  const equipoPropio = ids[idx];
+  const form = `
+    <h3>Nuevo partido</h3>
 
-  if (!equipoPropio) {
-    alert("Selección no válida.");
-    return;
-  }
+    <label>Equipo propio:</label>
+    <select id="fp-equipo">${opts}</select>
 
-  /* -------------------------------
-     Nombre del equipo rival
-     ------------------------------- */
-  const equipoRival = prompt("Nombre del equipo rival:");
-  if (!equipoRival) return;
+    <label>Equipo rival:</label>
+    <input id="fp-rival" type="text" />
 
-  /* -------------------------------
-     Fecha del partido
-     ------------------------------- */
-  const hoy = new Date().toISOString().slice(0, 10);
-  const fecha = prompt("Fecha del partido (YYYY-MM-DD):", hoy) || hoy;
+    <label>Fecha:</label>
+    <input id="fp-fecha" type="date" value="${hoy}" />
 
-  /* -------------------------------
-     Categoría (opcional)
-     ------------------------------- */
-  const categoria = prompt("Categoría (opcional):", "");
+    <label>Categoría:</label>
+    <select id="fp-cat">
+      <option value=""></option>
+      <option value="Benjamín">Benjamín</option>
+      <option value="Alevín">Alevín</option>
+      <option value="Infantil">Infantil</option>
+      <option value="Cadete">Cadete</option>
+      <option value="Juvenil">Juvenil</option>
+      <option value="Senior">Senior</option>
+    </select>
 
-  /* -------------------------------
-     Crear partido en el estado
-     ------------------------------- */
-  const pid = FS.state.crearPartido(equipoPropio, equipoRival, fecha, categoria);
+    <br><br>
+    <button onclick="FS.partidos.submitCreate()">Guardar</button>
+    <button onclick="FS.modal.close()">Cancelar</button>
+  `;
 
+  FS.modal.open(form);
+};
+
+FS.partidos.submitCreate = function () {
+  const equipoPropio = document.getElementById("fp-equipo").value;
+  const rival = document.getElementById("fp-rival").value;
+  const fecha = document.getElementById("fp-fecha").value;
+  const categoria = document.getElementById("fp-cat").value;
+
+  FS.state.crearPartido(equipoPropio, rival, fecha, categoria);
   FS.storage.guardarTodo();
+  FS.modal.close();
   FS.partidos.renderLista();
 };
+
 
 
 /* ============================================================
