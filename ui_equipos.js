@@ -1,6 +1,5 @@
 /* ============================================================
-   ui_equipos.js
-   Gestión de equipos dentro del SPA FlowStat
+   ui_equipos.js — Gestión de Equipos (con temporada)
    ============================================================ */
 
 window.FS = window.FS || {};
@@ -8,7 +7,7 @@ FS.equipos = {};
 
 
 /* ============================================================
-   RENDER DE LISTA DE EQUIPOS
+   LISTA DE EQUIPOS
    ============================================================ */
 
 FS.equipos.renderLista = function () {
@@ -37,9 +36,9 @@ FS.equipos.renderLista = function () {
     `;
 
     div.innerHTML = `
-      <strong>${eq.nombre}</strong>
-      <br>
-      <small>Categoría: ${eq.categoria || "—"}</small>
+      <strong>${eq.nombre}</strong><br>
+      <small>Categoría: ${eq.categoria}</small><br>
+      <small>Temporada: ${eq.temporada}</small>
       <br><br>
 
       <button onclick="FS.equipos.verJugadoras('${id}')">👁 Ver jugadoras</button>
@@ -54,7 +53,7 @@ FS.equipos.renderLista = function () {
 
 
 /* ============================================================
-   CREAR EQUIPO (modal)
+   CREAR EQUIPO
    ============================================================ */
 
 FS.equipos.create = function () {
@@ -63,7 +62,7 @@ FS.equipos.create = function () {
     <h3>Nuevo equipo</h3>
 
     <label>Nombre del equipo</label>
-    <input id="fe-nombre" type="text" />
+    <input id="fe-nombre" type="text">
 
     <label>Categoría</label>
     <select id="fe-cat">
@@ -75,6 +74,9 @@ FS.equipos.create = function () {
       <option value="Senior">Senior</option>
     </select>
 
+    <label>Temporada</label>
+    <input id="fe-temp" type="text" placeholder="Ej: 25/26">
+
     <br>
     <button onclick="FS.equipos.submitCreate()">Guardar</button>
     <button onclick="FS.modal.close()">Cancelar</button>
@@ -84,10 +86,16 @@ FS.equipos.create = function () {
 };
 
 FS.equipos.submitCreate = function () {
-  const nombre = document.getElementById("fe-nombre").value;
+  const nombre = document.getElementById("fe-nombre").value.trim();
   const categoria = document.getElementById("fe-cat").value;
+  const temporada = document.getElementById("fe-temp").value.trim();
 
-  const id = FS.state.crearEquipo(nombre, categoria);
+  if (!nombre || !temporada) {
+    alert("Nombre y temporada son obligatorios.");
+    return;
+  }
+
+  FS.state.crearEquipo(nombre, categoria, temporada);
 
   FS.storage.guardarTodo();
   FS.modal.close();
@@ -106,7 +114,7 @@ FS.equipos.editar = function (idEquipo) {
     <h3>Editar equipo</h3>
 
     <label>Nombre</label>
-    <input id="fe-nombre" type="text" value="${eq.nombre}" />
+    <input id="fe-nombre" type="text" value="${eq.nombre}">
 
     <label>Categoría</label>
     <select id="fe-cat">
@@ -117,6 +125,9 @@ FS.equipos.editar = function (idEquipo) {
       <option ${eq.categoria==="Juvenil"?"selected":""} value="Juvenil">Juvenil</option>
       <option ${eq.categoria==="Senior"?"selected":""} value="Senior">Senior</option>
     </select>
+
+    <label>Temporada</label>
+    <input id="fe-temp" type="text" value="${eq.temporada}">
 
     <br>
     <button onclick="FS.equipos.submitEdit('${idEquipo}')">Guardar</button>
@@ -129,8 +140,9 @@ FS.equipos.editar = function (idEquipo) {
 FS.equipos.submitEdit = function (idEquipo) {
   const eq = FS.state.equipos[idEquipo];
 
-  eq.nombre = document.getElementById("fe-nombre").value;
+  eq.nombre = document.getElementById("fe-nombre").value.trim();
   eq.categoria = document.getElementById("fe-cat").value;
+  eq.temporada = document.getElementById("fe-temp").value.trim();
 
   FS.storage.guardarTodo();
   FS.modal.close();
@@ -139,33 +151,28 @@ FS.equipos.submitEdit = function (idEquipo) {
 
 
 /* ============================================================
-   VER LISTA DE JUGADORAS DEL EQUIPO
+   GESTIÓN DE JUGADORAS DEL EQUIPO
    ============================================================ */
 
 FS.equipos.verJugadoras = function (idEquipo) {
   const eq = FS.state.equipos[idEquipo];
-  const jugadoras = FS.state.jugadoras;
+  const jug = FS.state.jugadoras;
 
   let msg = `Jugadoras de ${eq.nombre}:\n\n`;
 
   if (eq.jugadoras.length === 0) {
-    alert(msg + "(ninguna jugadora asignada)");
+    alert(msg + "(ninguna jugadora)");
     return;
   }
 
   eq.jugadoras.forEach(jid => {
-    const j = jugadoras[jid];
+    const j = jug[jid];
     msg += `${j.alias} (#${j.dorsal || "-"})\n`;
   });
 
   alert(msg);
 };
 
-
-/* ============================================================
-   GESTIÓN DE JUGADORAS DEL EQUIPO
-   (checkbox a la derecha)
-   ============================================================ */
 
 FS.equipos.editarJugadoras = function (idEquipo) {
   const eq = FS.state.equipos[idEquipo];
@@ -177,7 +184,7 @@ FS.equipos.editarJugadoras = function (idEquipo) {
     const checked = eq.jugadoras.includes(j.id) ? "checked" : "";
     opciones += `
       <label class="jug-opt">
-        <span>${j.alias} (#${j.dorsal || "–"})</span>
+        <span>${j.alias} (#${j.dorsal || "-"})</span>
         <input type="checkbox" class="chk-jug" value="${j.id}" ${checked}>
       </label>
     `;
@@ -206,9 +213,9 @@ FS.equipos.submitAsignarJugadoras = function (idEquipo) {
     if (c.checked) {
       eq.jugadoras.push(c.value);
 
-      // actualizar jugadora → equipos
       const j = FS.state.jugadoras[c.value];
-      if (!j.equipos.includes(idEquipo)) j.equipos.push(idEquipo);
+      if (!j.equipos.includes(idEquipo))
+        j.equipos.push(idEquipo);
     }
   });
 
@@ -219,18 +226,17 @@ FS.equipos.submitAsignarJugadoras = function (idEquipo) {
 
 
 /* ============================================================
-   BORRAR EQUIPO
+   BORRAR
    ============================================================ */
 
 FS.equipos.borrar = function (idEquipo) {
   const eq = FS.state.equipos[idEquipo];
   if (!confirm(`¿Eliminar el equipo ${eq.nombre}?`)) return;
 
-  // eliminar referencias en jugadoras
-  for (const jid in FS.state.jugadoras) {
-    const j = FS.state.jugadoras[jid];
+  // eliminar asociación en jugadoras
+  Object.values(FS.state.jugadoras).forEach(j => {
     j.equipos = j.equipos.filter(eid => eid !== idEquipo);
-  }
+  });
 
   delete FS.state.equipos[idEquipo];
 
@@ -240,7 +246,7 @@ FS.equipos.borrar = function (idEquipo) {
 
 
 /* ============================================================
-   HOOK: se ejecuta al entrar en la vista
+   HOOK DE ENTRADA
    ============================================================ */
 
 FS.equipos.onEnter = function () {
