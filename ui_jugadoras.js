@@ -64,33 +64,52 @@ FS.jugadoras.renderLista = function () {
 
 FS.jugadoras.create = function () {
 
-  const nombre = prompt("Nombre completo:");
-  if (!nombre) return;
+  const form = `
+    <h3>Nueva jugadora</h3>
 
-  let alias = prompt("Alias (máx. 7 caracteres):");
-  if (!alias) {
-    alert("Debes introducir un alias.");
+    <label>Nombre completo</label>
+    <input id="fj-nombre" type="text" />
+
+    <label>Alias (máx 7 chars)</label>
+    <input id="fj-alias" type="text" maxlength="7" />
+
+    <label>Dorsal (opcional)</label>
+    <input id="fj-dorsal" type="number" min="0" />
+
+    <label>Posición</label>
+    <select id="fj-pos">
+      <option value="colocadora">Colocadora</option>
+      <option value="opuesta">Opuesta</option>
+      <option value="central">Central</option>
+      <option value="líbero">Líbero</option>
+      <option value="receptora">Receptora</option>
+    </select>
+
+    <br><br>
+    <button onclick="FS.jugadoras.submitCreate()">Guardar</button>
+    <button onclick="FS.modal.close()">Cancelar</button>
+  `;
+
+  FS.modal.open(form);
+};
+
+FS.jugadoras.submitCreate = function () {
+  const nombre = document.getElementById("fj-nombre").value.trim();
+  const alias  = document.getElementById("fj-alias").value.trim();
+  const dorsal = document.getElementById("fj-dorsal").value.trim();
+  const pos    = document.getElementById("fj-pos").value;
+
+  if (!nombre || !alias) {
+    alert("Nombre y alias son obligatorios.");
     return;
   }
-  alias = alias.slice(0,7); // limitar longitud
 
-  const dorsal = prompt("Dorsal (opcional):") || "";
-
-  const posicion = prompt(
-    "Posición (por defecto):\n" +
-    "colocadora / opuesta / central / punta / libero"
-  ) || "";
-
-  const id = FS.state.crearJugadora(
-    nombre,
-    alias,
-    dorsal,
-    posicion
-  );
-
+  FS.state.crearJugadora(nombre, alias, dorsal, pos);
   FS.storage.guardarTodo();
+  FS.modal.close();
   FS.jugadoras.renderLista();
 };
+
 
 
 
@@ -98,31 +117,51 @@ FS.jugadoras.create = function () {
    EDITAR JUGADORA
    ============================================================ */
 
-FS.jugadoras.edit = function (idJugadora) {
-  const j = FS.state.jugadoras[idJugadora];
+FS.jugadoras.edit = function (id) {
+  const j = FS.state.jugadoras[id];
 
-  const nuevoNombre = prompt("Nombre completo:", j.nombre);
-  if (!nuevoNombre) return;
+  const form = `
+    <h3>Editar jugadora</h3>
 
-  let nuevoAlias = prompt("Alias (máx. 7 caracteres):", j.alias);
-  if (!nuevoAlias) return;
-  nuevoAlias = nuevoAlias.slice(0,7);
+    <label>Nombre completo</label>
+    <input id="fj-nombre" type="text" value="${j.nombre}" />
 
-  const nuevoDorsal = prompt("Dorsal (opcional):", j.dorsal);
+    <label>Alias (máx 7 chars)</label>
+    <input id="fj-alias" type="text" maxlength="7" value="${j.alias}" />
 
-  const nuevaPos = prompt(
-    "Posición (colocadora, opuesta, central, punta, libero):",
-    j.posicion
-  );
+    <label>Dorsal (opcional)</label>
+    <input id="fj-dorsal" type="number" value="${j.dorsal}" />
 
-  j.nombre = nuevoNombre;
-  j.alias = nuevoAlias;
-  j.dorsal = nuevoDorsal;
-  j.posicion = nuevaPos;
+    <label>Posición</label>
+    <select id="fj-pos">
+      <option ${j.posicion==="colocadora"?"selected":""} value="colocadora">Colocadora</option>
+      <option ${j.posicion==="opuesta"?"selected":""} value="opuesta">Opuesta</option>
+      <option ${j.posicion==="central"?"selected":""} value="central">Central</option>
+      <option ${j.posicion==="líbero"?"selected":""} value="líbero">Líbero</option>
+      <option ${j.posicion==="receptora"?"selected":""} value="receptora">Receptora</option>
+    </select>
+
+    <br><br>
+    <button onclick="FS.jugadoras.submitEdit('${id}')">Guardar</button>
+    <button onclick="FS.modal.close()">Cancelar</button>
+  `;
+
+  FS.modal.open(form);
+};
+
+FS.jugadoras.submitEdit = function (id) {
+  const j = FS.state.jugadoras[id];
+
+  j.nombre   = document.getElementById("fj-nombre").value.trim();
+  j.alias    = document.getElementById("fj-alias").value.trim();
+  j.dorsal   = document.getElementById("fj-dorsal").value.trim();
+  j.posicion = document.getElementById("fj-pos").value;
 
   FS.storage.guardarTodo();
+  FS.modal.close();
   FS.jugadoras.renderLista();
 };
+
 
 
 
