@@ -1,6 +1,6 @@
 /* =========================================
    BASE Y SAFE AREAS PARA IOS
-   ========================================= */
+========================================= */
 html, body {
   height: 100%;
   margin: 0;
@@ -8,17 +8,18 @@ html, body {
            env(safe-area-inset-bottom) env(safe-area-inset-left);
   font-family: system-ui, sans-serif;
   background:#eef2f7;
-  overflow:hidden; /* PWA sin scroll */
+  overflow:hidden;
 }
 
-/* Reducido para iPhone mini */
+.hidden { display: none !important; }
+
 .app{
   padding:6px;
 }
 
 /* =========================================
    FILA SUPERIOR
-   ========================================= */
+========================================= */
 .top-row{
   display:flex;
   align-items:center;
@@ -49,7 +50,6 @@ html, body {
   background:#e7f2ff;
 }
 
-/* Botones superiores */
 .action-btn{
   height:50px;
   padding:0 12px;
@@ -60,8 +60,7 @@ html, body {
 }
 
 .icon-btn{
-  width:46px;
-  height:46px;
+  width:46px; height:46px;
   background:white;
   border-radius:8px;
   border:1px solid #ccc;
@@ -72,9 +71,7 @@ html, body {
 
 /* =========================================
    GRID DE ACCIONES
-   ========================================= */
-
-/* ⚠️ Altura la controla app.js dinámicamente */
+========================================= */
 .groups{
   display:grid;
   grid-template-columns: repeat(3, 1fr);
@@ -115,96 +112,32 @@ html, body {
 }
 
 /* =========================================
-   OPTIMIZACIÓN PARA DISPOSITIVOS PEQUEÑOS
-   (iPhone 12 mini, iPhone SE, Android compactos)
-   ========================================= */
+   OPTIMIZACIÓN PANTALLAS PEQUEÑAS
+========================================= */
 @media (max-height: 400px) {
-  .act-btn {
-    min-height: 42px;
-    font-size: 13px;
-  }
-
-  .player-btn {
-    width: 44px;
-    height: 44px;
-    font-size: 14px;
-  }
-
-  .action-btn, .icon-btn {
-    height: 44px;
-  }
-
-  .group .title {
-    font-size: 14px;
-  }
-
-  .groups {
-    gap: 8px;
-  }
-
-  .app {
-    padding: 4px;
-  }
+  .act-btn { min-height: 42px; font-size: 13px; }
+  .player-btn { width: 44px; height: 44px; font-size: 14px; }
+  .action-btn, .icon-btn { height: 44px; }
+  .group .title { font-size: 14px; }
+  .groups { gap: 8px; }
+  .app { padding: 4px; }
 }
 
-/* Oculta las vistas que no están activas en el SPA */
-.view.hidden {
-  display: none !important;
-}
+/* Ocultar vistas no activas */
+.view.hidden { display:none !important; }
+.view.active { display:block; }
 
-/* Solo como referencia: puedes estilizar la vista visible con .active si quieres */
-.view.active {
-  display: block;
-}
-
-/* ===============================
-   Colores por posición
-   =============================== */
-
-.player-btn.colocadora {
-  background: #ffe9cc;
-  border-color: #ffb86b;
-}
-
-.player-btn.opuesta {
-  background: #ffd1d1;
-  border-color: #ff8a8a;
-}
-
-.player-btn.central {
-  background: #d1ffd8;
-  border-color: #74e38a;
-}
-
-/* Líbero: permitir "líbero" → "libero" */
-.player-btn.libero {
-  background: #fff59f;
-  border-color: #e1cf32;
-}
-
-.player-btn.receptora {
-  background: #d6e2ff;
-  border-color: #8aa7ff;
-}
-.modal-bg {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index: 9999;
-}
-
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-}
 /* =========================================
-   MODAL – FONDO
+   COLORES POR POSICIÓN
+========================================= */
+.player-btn.colocadora { background:#ffe9cc; border-color:#ffb86b; }
+.player-btn.opuesta    { background:#ffd1d1; border-color:#ff8a8a; }
+.player-btn.central    { background:#d1ffd8; border-color:#74e38a; }
+.player-btn.libero     { background:#fff59f; border-color:#e1cf32; }
+.player-btn.receptora  { background:#d6e2ff; border-color:#8aa7ff; }
+
+/* =========================================
+   MODAL – FONDO Y CONTENIDO
 ========================================= */
 #modal-bg {
   position: fixed;
@@ -217,162 +150,90 @@ html, body {
 }
 
 #modal-bg:not(.hidden) {
-  display: flex;
+  display:flex;
 }
 
-/* =========================================
-   MODAL – CONTENIDO
-========================================= */
 #modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 420px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  width:90%;
+  max-width:420px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.25);
 }
 
-/* TITULITOS DEL MODAL */
+/* Título modal */
 #modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 20px;
-  text-align: center;
+  margin:0 0 15px;
+  font-size:20px;
+  text-align:center;
 }
 
-/* =========================================
-   FORMULARIOS EN EL MODAL
-========================================= */
+/* Formularios */
 #modal-content label {
-  display: block;          /* <-- Esto pone cada label en línea propia */
-  margin-top: 12px;
-  margin-bottom: 4px;
-  font-size: 16px;
-  font-weight: 600;
+  display:block;
+  margin:6px 0 2px;
+  font-size:16px;
+  font-weight:600;
 }
 
 #modal-content input,
 #modal-content select {
-  width: 100%;             /* <-- Este es el punto clave */
-  box-sizing: border-box;
-  padding: 10px;
-  font-size: 16px;         /* <-- letra más grande */
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  margin-bottom: 8px;      /* separación entre campos */
-  background: #fdfdfd;
+  width:100%;
+  padding:8px;
+  font-size:16px;
+  border:1px solid #ccc;
+  border-radius:6px;
+  margin-bottom:6px;
+  box-sizing:border-box;
+  background:#fafafa;
+}
+
+/* Botones */
+#modal-content button {
+  font-size:16px;
+  padding:10px 14px;
+  border-radius:8px;
+  border:none;
+  margin-right:8px;
+  margin-top:10px;
+}
+
+#modal-content button:first-of-type {
+  background:#4caf50;
+  color:white;
+}
+#modal-content button:last-of-type {
+  background:#ccc;
 }
 
 /* =========================================
-   BOTONES DEL MODAL
+   OPCIONES DE JUGADORAS (checkbox alineado)
 ========================================= */
-#modal-content button {
-  font-size: 16px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: none;
-  margin-right: 8px;
-  margin-top: 10px;
-}
-
-#modal-content button:first-of-type {
-  background: #4caf50;   /* Guardar */
-  color: white;
-}
-
-#modal-content button:first-of-type:hover {
-  background: #449b47;
-}
-
-#modal-content button:last-of-type {
-  background: #ddd;      /* Cancelar */
-}
-
-#modal-content button:last-of-type:hover {
-  background: #c8c8c8;
-}
-
-/* FORMULARIOS DENTRO DEL MODAL */
-#modal-content label {
-  display: block;
-  font-size: 16px;
-  font-weight: 600;
-  margin: 6px 0 2px;
-}
-
-#modal-content input,
-#modal-content select {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 8px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  margin-bottom: 6px;
-  background: #fafafa;
-}
-
-#modal-content button {
-  font-size: 16px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: none;
-  margin-right: 8px;
-  margin-top: 10px;
-}
-
-#modal-content button:first-of-type {
-  background: #4caf50;
-  color: white;
-}
-
-#modal-content button:last-of-type {
-  background: #ccc;
-}
-/* =========================
-   Opciones de jugadoras (alinear checkbox a la derecha)
-   Coloca este bloque AL FINAL de style.css
-   ========================= */
 label.jug-opt {
-  display: flex !important;           /* forzar fila */
-  flex-direction: row !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  gap: 12px;
-  padding: 6px 0;
-  font-size: 15px;
-  border-bottom: 1px solid #eee;
-  box-sizing: border-box;
-  width: 100%;
+  display:flex !important;
+  flex-direction:row !important;
+  justify-content:space-between !important;
+  align-items:center !important;
+  width:100%;
+  padding:6px 0;
+  border-bottom:1px solid #eee;
+  font-size:16px;
+  color:#000 !important;
 }
 
-/* último elemento sin línea inferior */
-label.jug-opt:last-child {
-  border-bottom: none;
+label.jug-opt span {
+  flex:1 1 auto;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  margin-right:8px;
 }
 
-/* texto (alias + dorsal) ocupa el espacio disponible */
-label.jug-opt > span {
-  display: inline-block;
-  flex: 1 1 auto;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-right: 8px;
+label.jug-opt input[type="checkbox"] {
+  width:22px;
+  height:22px;
+  margin:0;
+  flex:0 0 auto;
+  accent-color:#0077ff;
 }
-
-/* checkbox a la derecha, tamaño mayor para dedo */
-label.jug-opt > input[type="checkbox"] {
-  flex: 0 0 auto;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  accent-color: #0077ff; /* color del cuadro/tick en navegadores que lo soporten */
-}
-
-/* evitar que reglas globales de label hagan saltos */
-label.jug-opt br { display: none !important; }
-
-
-.hidden { display:none; }
-
