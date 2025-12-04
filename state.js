@@ -26,18 +26,20 @@ FS.state = {
      CREACIÓN DE ENTIDADES
      ======================================== */
 
-  crearJugadora(nombre, dorsal, equipos = []) {
-    const id = "j_" + crypto.randomUUID();
+  crearJugadora(nombre, alias, dorsal = "", posicion = "", equipos = []) {
+  const id = "j_" + crypto.randomUUID();
 
-    FS.state.jugadoras[id] = {
-      id,
-      nombre,
-      dorsal,
-      equipos: [...equipos]
-    };
+  FS.state.jugadoras[id] = {
+    id,
+    nombre,
+    alias,       // nuevo campo
+    dorsal,      // opcional
+    posicion,    // nuevo campo
+    equipos: [...equipos]
+  };
 
-    return id;
-  },
+  return id;
+},
 
   crearEquipo(nombre, categoria = "") {
     const id = "t_" + crypto.randomUUID();
