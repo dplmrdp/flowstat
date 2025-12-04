@@ -292,5 +292,43 @@ html, body {
   background: #c8c8c8;
 }
 
+/* FORMULARIOS DENTRO DEL MODAL */
+#modal-content label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 12px 0 4px;
+}
+
+#modal-content input,
+#modal-content select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  background: #fafafa;
+}
+
+#modal-content button {
+  font-size: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  margin-right: 8px;
+  margin-top: 10px;
+}
+
+#modal-content button:first-of-type {
+  background: #4caf50;
+  color: white;
+}
+
+#modal-content button:last-of-type {
+  background: #ccc;
+}
+
 .hidden { display:none; }
 
