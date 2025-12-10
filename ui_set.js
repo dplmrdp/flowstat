@@ -314,24 +314,37 @@ FS.sets.cancelUndo = function () {
    FINALIZAR SET
    ============================================================ */
 
-document.getElementById("btn-finish").onclick = () => {
+document.getElementById("btn-finish").onclick = async () => {
   if (!confirm("¿Finalizar este set?")) return;
 
+  const partidoId = FS.state.partidoActivo;
+  const setNumero = FS.state.setActivo;
+
+  // 1) Finalizar set en memoria
   FS.state.finalizarSet();
 
-  // Guardar en local
-  // después de FS.state.finalizarSet();
-FS.storage.guardarTodo();
-FS.storage.handleSetFinalized(FS.state.partidoActivo, númeroDelSet);
+  // 2) Guardar local
+  FS.storage.guardarTodo();
 
+  // 3) Mostrar mensaje temporal
+  FS.sets.mostrarSyncStatus("Sincronizando set con Firestore…");
 
-  // Subida a Firestore (cuando esté activado)
-  // FS.storage.subirSetAFirestore(...)
+  // 4) Intentar subir a Firestore
+  const r = await FS.storage.handleSetFinalized(partidoId, setNumero);
 
-  alert("Set finalizado.");
+  if (r.ok) {
+    FS.sets.mostrarSyncStatus("Set sincronizado correctamente ✔️");
+  } else {
+    FS.sets.mostrarSyncStatus("Sin conexión: set encolado para subir más tarde ⏳");
+  }
 
-  FS.router.go("partidos");
+  // 5) Esperar un segundo antes de salir
+  setTimeout(() => {
+    FS.sets.mostrarSyncStatus(""); 
+    FS.router.go("partidos");
+  }, 1000);
 };
+
 
 
 /* ============================================================
@@ -358,4 +371,30 @@ FS.sets.ajustarAlturaGrid = function () {
 window.addEventListener("resize", FS.sets.ajustarAlturaGrid);
 window.addEventListener("orientationchange", FS.sets.ajustarAlturaGrid);
 window.addEventListener("load", FS.sets.ajustarAlturaGrid);
+
+/* ============================================================
+   Mostrar estado de sincronización (Firestore)
+============================================================ */
+FS.sets.mostrarSyncStatus = function (msg) {
+  let bar = document.getElementById("sync-status-bar");
+
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "sync-status-bar";
+    bar.style = `
+      background: #eef5ff;
+      border: 1px solid #aac9ff;
+      padding: 8px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      font-size: 14px;
+      text-align: center;
+    `;
+    const topRow = document.querySelector(".top-row");
+    topRow.insertAdjacentElement("afterend", bar);
+  }
+
+  bar.textContent = msg || "";
+  bar.style.display = msg ? "block" : "none";
+};
 
