@@ -1,0 +1,89 @@
+// firebase-init.js
+// Usar como <script type="module" src="firebase-init.js"></script>
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  addDoc,
+  serverTimestamp,
+  getDoc,
+  getDocs,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+window.FS = window.FS || {};
+FS.firebase = FS.firebase || { enabled: false };
+
+// ---------- CONFIGURA AQUÍ (REEMPLAZA) ----------
+const FIREBASE_CONFIG = {
+  apiKey: "REPLACE_APIKEY",
+  authDomain: "REPLACE_AUTHDOMAIN",
+  projectId: "REPLACE_PROJECTID",
+  // ... el resto del objeto (storageBucket, messagingSenderId, appId) si lo tienes
+};
+// -------------------------------------------------
+
+// Si no has completado la config, no inicializamos y la app seguirá funcionando localmente.
+if (!FIREBASE_CONFIG || !FIREBASE_CONFIG.projectId || FIREBASE_CONFIG.apiKey === "REPLACE_APIKEY") {
+  console.warn("Firebase no está configurado. Firestore deshabilitado hasta que pegues la config en firebase-init.js");
+} else {
+  const app = initializeApp(FIREBASE_CONFIG);
+  const db = getFirestore(app);
+  FS.firebase.enabled = true;
+  FS.firebase.db = db;
+  console.log("Firebase inicializado, projectId:", FIREBASE_CONFIG.projectId);
+
+  // Utilidades rápidas expuestas
+  FS.firebase.addAction = async function(partidoId, setNumero, actionObj){
+    // ruta: partidos/{partidoId}/sets/{setNumero}/acciones
+    try {
+      const accionesCol = collection(db, "partidos", partidoId, "sets", String(setNumero), "acciones");
+      // añadimos marca de servidor
+      actionObj._server_ts = serverTimestamp();
+      const docRef = await addDoc(accionesCol, actionObj);
+      return { ok: true, id: docRef.id };
+    } catch (err) {
+      console.error("FS addAction error:", err);
+      return { ok: false, error: err };
+    }
+  };
+
+  FS.firebase.saveSetDoc = async function(partidoId, setNumero, setMeta){
+    // guarda el documento resumen del set: /partidos/{partidoId}/sets/{setNumero}
+    try {
+      const setRef = doc(db, "partidos", partidoId, "sets", String(setNumero));
+      const payload = Object.assign({}, setMeta, { updatedAt: serverTimestamp() });
+      await setDoc(setRef, payload, { merge: true });
+      return { ok: true };
+    } catch (err) {
+      console.error("FS saveSetDoc error:", err);
+      return { ok: false, error: err };
+    }
+  };
+
+  FS.firebase.savePartido = async function(partidoId, partidoObj){
+    try {
+      const pRef = doc(db, "partidos", partidoId);
+      await setDoc(pRef, Object.assign({}, partidoObj, { updatedAt: serverTimestamp() }), { merge: true });
+      return { ok: true };
+    } catch (err) {
+      console.error("FS savePartido error:", err);
+      return { ok: false, error: err };
+    }
+  };
+
+  FS.firebase.queryPartidosBySeason = async function(temporada){
+    try {
+      const q = query(collection(db, "partidos"), where("temporada", "==", temporada));
+      const snap = await getDocs(q);
+      return { ok: true, docs: snap.docs.map(d => ({ id: d.id, data: d.data() })) };
+    } catch (err) {
+      console.error("FS query error:", err);
+      return { ok: false, error: err };
+    }
+  };
+}
