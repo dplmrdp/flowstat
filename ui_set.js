@@ -320,7 +320,10 @@ document.getElementById("btn-finish").onclick = () => {
   FS.state.finalizarSet();
 
   // Guardar en local
-  FS.storage.guardarTodo();
+  // después de FS.state.finalizarSet();
+FS.storage.guardarTodo();
+FS.storage.handleSetFinalized(FS.state.partidoActivo, númeroDelSet);
+
 
   // Subida a Firestore (cuando esté activado)
   // FS.storage.subirSetAFirestore(...)
