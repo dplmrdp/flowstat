@@ -276,3 +276,13 @@ label.jug-opt input[type="checkbox"] {
   margin-left: 8px !important;
   transform: none !important;
 }
+
+#sync-status-bar {
+  animation: fadein 0.3s ease;
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
