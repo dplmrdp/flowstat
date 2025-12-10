@@ -19,12 +19,29 @@ window.FS = window.FS || {};
 FS.firebase = FS.firebase || { enabled: false };
 
 // ---------- CONFIGURA AQUÍ (REEMPLAZA) ----------
-const FIREBASE_CONFIG = {
-  apiKey: "REPLACE_APIKEY",
-  authDomain: "REPLACE_AUTHDOMAIN",
-  projectId: "REPLACE_PROJECTID",
-  // ... el resto del objeto (storageBucket, messagingSenderId, appId) si lo tienes
-};
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyD4f7expDxaHtcU1vztS9p4IXVnYlv1Y6E",
+    authDomain: "flowstat-a3843.firebaseapp.com",
+    projectId: "flowstat-a3843",
+    storageBucket: "flowstat-a3843.firebasestorage.app",
+    messagingSenderId: "667017484046",
+    appId: "1:667017484046:web:be22a16c3bdcdd75e4e95f",
+    measurementId: "G-8ZESX1WGBC"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 // -------------------------------------------------
 
 // Si no has completado la config, no inicializamos y la app seguirá funcionando localmente.
