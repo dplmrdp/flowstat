@@ -285,7 +285,14 @@ label.jug-opt input[type="checkbox"] {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+/* Hacer que la clase hidden realmente oculte */
 .hidden {
   display: none !important;
 }
+
+/* Evitar que el overflow bloquee el modal */
+html, body {
+  overflow: visible !important;
+}
+
 
