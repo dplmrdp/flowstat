@@ -13,22 +13,16 @@
 
   <body>
 
-    
-
     <!-- ============================================
-         APP ROOT
+         APP ROOT (todo dentro de #app)
     ============================================= -->
     <div id="app" class="app">
 
-<!-- ============================================
-         FIREBASE STATUS PANEL (diagnóstico)
-    ============================================= -->
-    <div id="firebase-status"
-        style="background:#eef2ff;padding:10px;margin:10px;border-radius:8px;font-size:14px;display:none;">
-      Verificando Firebase…
-    </div>
-      
-      <!-- PANTALLAS DEL SPA -->
+      <!-- FIREBASE STATUS PANEL -->
+      <div id="firebase-status"
+          style="background:#eef2ff;padding:10px;margin:10px;border-radius:8px;font-size:14px;display:none;">
+        Verificando Firebase…
+      </div>
 
       <!-- HOME -->
       <section id="view-home" class="view active">
@@ -68,7 +62,6 @@
 
         <div class="top-row">
           <div class="players" id="players-container"></div>
-
           <button id="btn-change" class="action-btn">Cambiar</button>
           <button id="btn-finish" class="action-btn">Finalizar set</button>
           <div id="undo-container"></div>
@@ -79,41 +72,41 @@
         <button onclick="FS.router.go('partidos')">🔙 Volver</button>
       </section>
 
-    </div>
+      <!-- ============================================
+           MODAL (moved inside #app)
+      ============================================= -->
+      <div id="modal-bg" class="hidden modal-bg">
+        <div id="modal-content" class="modal-content"></div>
+      </div>
 
-    <!-- ============================================
-         MODAL
-    ============================================= -->
-    <div id="modal-bg" class="hidden modal-bg">
-      <div id="modal-content" class="modal-content"></div>
-    </div>
+    </div> <!-- FIN DE #APP -->
 
     <!-- ============================================
          SCRIPT LOADING ORDER — IMPORTANT
     ============================================= -->
-   <!-- AÑADE ESTO EN index.html, ANTES DE firebase-init.js -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
-
-    <!-- 1) FIREBASE MUST LOAD FIRST -->
+    <!-- Firebase Init -->
     <script type="module" src="firebase-init.js"></script>
 
-    <!-- 2) CORE STATE / STORAGE -->
+    <!-- Core State + Storage -->
     <script src="state.js"></script>
     <script src="storage.js"></script>
 
-    <!-- 3) ROUTER + MODAL -->
+    <!-- Router + Modal -->
     <script src="router.js"></script>
     <script src="modal.js"></script>
 
-    <!-- 4) UI MODULES -->
+    <!-- UI Modules -->
     <script src="ui_partidos.js"></script>
     <script src="ui_equipos.js"></script>
     <script src="ui_jugadoras.js"></script>
     <script src="ui_set.js"></script>
 
-    <!-- 5) APP BOOTSTRAP -->
+    <!-- App Bootstrap -->
     <script src="app.js"></script>
 
   </body>
