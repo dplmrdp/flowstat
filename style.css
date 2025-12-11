@@ -285,4 +285,7 @@ label.jug-opt input[type="checkbox"] {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+.hidden {
+  display: none !important;
+}
 
