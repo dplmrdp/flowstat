@@ -1,3 +1,5 @@
+alert("Firebase INIT cargado");
+
 // firebase-init.js
 // Usar como <script type="module" src="firebase-init.js"></script>
 
