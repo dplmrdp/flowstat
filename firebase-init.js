@@ -139,5 +139,44 @@ FS.firebase.saveEquipo = async function (id, equipoObj) {
     return { ok: false, error: err };
   }
 };
+// ==========================
+// DIAGNÓSTICO FIREBASE
+// ==========================
+window.FS = window.FS || {};
+FS.firebaseDiag = async function () {
+  const box = document.getElementById("firebase-status");
+  if (!box) return;
+
+  box.style.display = "block";
+  box.textContent = "Comprobando configuración Firebase…";
+
+  if (!FS.firebase || !FS.firebase.enabled) {
+    box.textContent = "❌ Firebase NO está inicializado. Revisa firebaseConfig o el orden de scripts.";
+    return;
+  }
+
+  box.textContent = "✔ Firebase inicializado. Comprobando Firestore…";
+
+  // intentamos escribir una jugadora de diagnóstico
+  try {
+    const testId = "diagnostic_test";
+    const result = await FS.firebase.saveJugadora(testId, {
+      nombre: "TEST",
+      alias: "TEST",
+      posicion: "central",
+    });
+
+    if (result.ok) {
+      box.textContent = "✔ Firestore operativo. Revisa en consola Firebase el documento jugadoras/diagnostic_test";
+    } else {
+      box.textContent = "❌ Firestore NO funciona. Error: " + JSON.stringify(result.error);
+    }
+  } catch (e) {
+    box.textContent = "❌ Error al conectar con Firestore: " + e.message;
+  }
+};
+
+// Ejecutar diagnóstico cuando cargue la app
+setTimeout(FS.firebaseDiag, 1500);
 
 }
