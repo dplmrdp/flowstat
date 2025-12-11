@@ -134,8 +134,15 @@ FS.jugadoras.submitCreate = async function () {
     FS.storage._enqueuePendingEntity("jugadora", id, FS.state.jugadoras[id]);
   }
 
+  // Cerrar modal (robusto)
+try { 
   FS.modal.close();
-  FS.jugadoras.renderLista();
+} catch (e) {}
+document.getElementById("modal-bg").classList.add("hidden");
+
+// Refrescar lista
+FS.jugadoras.renderLista();
+
 };
 
 /* editar (listeners seguros) */
@@ -204,8 +211,15 @@ FS.jugadoras.submitEdit = async function (id) {
     FS.storage._enqueuePendingEntity("jugadora", id, j);
   }
 
+  // Cerrar modal (robusto)
+try { 
   FS.modal.close();
-  FS.jugadoras.renderLista();
+} catch (e) {}
+document.getElementById("modal-bg").classList.add("hidden");
+
+// Refrescar lista
+FS.jugadoras.renderLista();
+
 };
 
 /* borrar */
