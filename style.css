@@ -1,56 +1,118 @@
-/* ======== RESET / BASE ======== */
+/* =========================================================
+   PALETA Y VARIABLES
+   ========================================================= */
+:root {
+  --blue-primary: #4a90e2;
+  --blue-hover: #3a78c4;
+  --blue-active: #2f5ea0;
+
+  --gray-bg: #f5f5f7;
+  --gray-card: #ffffff;
+  --gray-border: #d2d2d7;
+  --gray-soft: #e5e5ea;
+  --gray-soft-hover: #d1d1d6;
+
+  --text-default: #1c1c1e;
+  --text-muted: #6e6e73;
+
+  --radius-xl: 22px;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+}
+
+/* =========================================================
+   BASE GLOBAL
+   ========================================================= */
 html, body {
   margin: 0;
   padding: 0;
-  background: #f5f5f7; /* gris suave Apple */
+  background: var(--gray-bg);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  color: #1c1c1e;
-  overflow: visible;
+  color: var(--text-default);
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
-/* títulos */
 h1, h2, h3 {
   font-weight: 600;
   margin-bottom: 12px;
 }
 
-/* ======== CONTENEDOR APP ======== */
+/* =========================================================
+   APP WRAPPER
+   ========================================================= */
 #app {
   padding: 16px;
 }
 
-/* ======== BOTONES PRINCIPALES ======== */
+/* =========================================================
+   BOTONES — RESET GLOBAL
+   ========================================================= */
 button {
+  font: inherit;
+  border: none;
+  cursor: pointer;
+  background: none;
+}
+
+/* Botón genérico reutilizable */
+.btn {
+  padding: 12px 16px;
+  background: var(--gray-soft);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.btn:hover {
+  background: var(--gray-soft-hover);
+}
+
+/* =========================================================
+   BOTONES DE LA PANTALLA DE INICIO
+   (limitados a #home-view para no romper la app)
+   ========================================================= */
+#home-view button {
   display: block;
   width: 100%;
   padding: 14px 18px;
-  margin: 8px 0;
-  background: #007aff;
+  margin: 10px 0;
+  background: var(--blue-primary);
   color: white;
-  border: none;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   font-size: 17px;
   font-weight: 500;
-  cursor: pointer;
   transition: background 0.2s;
 }
 
-button:hover {
-  background: #0059c9;
+#home-view button:hover {
+  background: var(--blue-hover);
 }
 
-button:active {
-  background: #0047a3;
+#home-view button:active {
+  background: var(--blue-active);
 }
 
-/* ======== CARDS (listas: jugadoras, equipos...) ======== */
+/* Imagen o logo en la home */
+#home-view img,
+.hero-img {
+  max-width: 100%;
+  display: block;
+  margin: 0 auto 20px;
+  pointer-events: none; /* evita tapar botones */
+}
+
+/* =========================================================
+   CARDS (Jugadoras, Equipos, Partidos)
+   ========================================================= */
 .jugadora-item,
 .equipo-item,
 .partido-item {
-  background: white;
+  background: var(--gray-card);
   padding: 14px 16px;
-  border-radius: 16px;
-  box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   margin-bottom: 12px;
 }
 
@@ -58,39 +120,44 @@ button:active {
 .jugadora-item button,
 .equipo-item button,
 .partido-item button {
-  width: auto;
-  display: inline-block;
+  background: var(--gray-soft);
+  color: var(--text-default);
+  padding: 6px 14px;
   margin-right: 8px;
   margin-top: 6px;
-  padding: 6px 14px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
-  background: #e5e5ea;
-  color: #000;
-  border-radius: 10px;
 }
 
-.jugadora-item button:hover {
-  background: #d1d1d6;
+.jugadora-item button:hover,
+.equipo-item button:hover,
+.partido-item button:hover {
+  background: var(--gray-soft-hover);
 }
 
-/* ======== INPUTS / FORM ======== */
+/* =========================================================
+   FORMULARIOS
+   ========================================================= */
 input, select {
   width: 100%;
   padding: 12px;
   margin: 8px 0 16px 0;
-  border: 1px solid #d2d2d7;
-  border-radius: 12px;
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius-md);
   font-size: 16px;
   background: #fafafa;
+  box-sizing: border-box;
 }
 
 input:focus, select:focus {
   outline: none;
-  border-color: #007aff;
+  border-color: var(--blue-primary);
   background: white;
 }
 
-/* ======== MODAL ======== */
+/* =========================================================
+   MODAL
+   ========================================================= */
 #modal-bg.hidden {
   display: none !important;
 }
@@ -110,7 +177,7 @@ input:focus, select:focus {
   padding: 24px;
   width: 90%;
   max-width: 420px;
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 
@@ -118,7 +185,9 @@ input:focus, select:focus {
   margin-top: 0;
 }
 
-/* ======== VISTAS ======== */
+/* =========================================================
+   SPA — VISTAS
+   ========================================================= */
 .view {
   display: none;
 }
@@ -126,3 +195,37 @@ input:focus, select:focus {
 .view.active {
   display: block;
 }
+
+/* =========================================================
+   UTILIDADES
+   ========================================================= */
+.hidden {
+  display: none !important;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+
+.mb-1 { margin-bottom: 4px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+
+/* =========================================================
+   FUTURO: BLOQUE RESERVADO PARA “REGISTRO DE SET”
+   (Se añadirá cuando finalicemos la UI live)
+   ========================================================= */
+/* 
+.set-container { ... }
+.top-row { ... }
+.player-btn { ... }
+.action-groups { ... }
+.act-btn { ... }
+*/
+
