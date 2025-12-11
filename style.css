@@ -1,323 +1,128 @@
-/* =========================================
-   BASE Y SAFE AREAS PARA IOS
-========================================= */
+/* ======== RESET / BASE ======== */
 html, body {
-  height: 100%;
   margin: 0;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-           env(safe-area-inset-bottom) env(safe-area-inset-left);
-  font-family: system-ui, sans-serif;
-  background:#eef2f7;
-  overflow:hidden;
+  padding: 0;
+  background: #f5f5f7; /* gris suave Apple */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1c1c1e;
+  overflow: visible;
 }
 
-.hidden { display: none !important; }
-
-.app{
-  padding:6px;
+/* títulos */
+h1, h2, h3 {
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
-/* =========================================
-   FILA SUPERIOR
-========================================= */
-.top-row{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:10px;
+/* ======== CONTENEDOR APP ======== */
+#app {
+  padding: 16px;
 }
 
-.players{
-  display:flex;
-  flex:1;
-  gap:6px;
+/* ======== BOTONES PRINCIPALES ======== */
+button {
+  display: block;
+  width: 100%;
+  padding: 14px 18px;
+  margin: 8px 0;
+  background: #007aff;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
-.player-btn{
-  width:50px;
-  height:50px;
-  background:white;
-  border-radius:8px;
-  border:2px solid #ccc;
-  font-weight:700;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+button:hover {
+  background: #0059c9;
 }
 
-.player-btn.selected{
-  border-color:#0077ff;
-  background:#e7f2ff;
+button:active {
+  background: #0047a3;
 }
 
-.action-btn{
-  height:50px;
-  padding:0 12px;
-  border-radius:8px;
-  background:white;
-  border:1px solid #ccc;
-  font-weight:600;
+/* ======== CARDS (listas: jugadoras, equipos...) ======== */
+.jugadora-item,
+.equipo-item,
+.partido-item {
+  background: white;
+  padding: 14px 16px;
+  border-radius: 16px;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 12px;
 }
 
-.icon-btn{
-  width:46px; height:46px;
-  background:white;
-  border-radius:8px;
-  border:1px solid #ccc;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+/* mini botones dentro de cards */
+.jugadora-item button,
+.equipo-item button,
+.partido-item button {
+  width: auto;
+  display: inline-block;
+  margin-right: 8px;
+  margin-top: 6px;
+  padding: 6px 14px;
+  font-size: 14px;
+  background: #e5e5ea;
+  color: #000;
+  border-radius: 10px;
 }
 
-/* =========================================
-   GRID DE ACCIONES
-========================================= */
-.groups{
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap:10px;
-  overflow:hidden;
-  height:100%;
-  max-height:100%;
+.jugadora-item button:hover {
+  background: #d1d1d6;
 }
 
-.group{
-  background:white;
-  border-radius:10px;
-  padding:8px;
-  display:flex;
-  flex-direction:column;
+/* ======== INPUTS / FORM ======== */
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0 16px 0;
+  border: 1px solid #d2d2d7;
+  border-radius: 12px;
+  font-size: 16px;
+  background: #fafafa;
 }
 
-.group .title{
-  font-weight:700;
-  margin-bottom:6px;
-  font-size:15px;
+input:focus, select:focus {
+  outline: none;
+  border-color: #007aff;
+  background: white;
 }
 
-.buttons-grid{
-  display:grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap:6px;
-}
-
-.act-btn{
-  min-height:48px;
-  border-radius:8px;
-  border:none;
-  background:#f1f1f1;
-  font-weight:600;
-  font-size:14px;
-}
-
-/* =========================================
-   OPTIMIZACIÓN PANTALLAS PEQUEÑAS
-========================================= */
-@media (max-height: 400px) {
-  .act-btn { min-height: 42px; font-size: 13px; }
-  .player-btn { width: 44px; height: 44px; font-size: 14px; }
-  .action-btn, .icon-btn { height: 44px; }
-  .group .title { font-size: 14px; }
-  .groups { gap: 8px; }
-  .app { padding: 4px; }
-}
-
-/* Ocultar vistas no activas */
-.view.hidden { display:none !important; }
-.view.active { display:block; }
-
-/* =========================================
-   COLORES POR POSICIÓN
-========================================= */
-.player-btn.colocadora { background:#ffe9cc; border-color:#ffb86b; }
-.player-btn.opuesta    { background:#ffd1d1; border-color:#ff8a8a; }
-.player-btn.central    { background:#d1ffd8; border-color:#74e38a; }
-.player-btn.libero     { background:#fff59f; border-color:#e1cf32; }
-.player-btn.receptora  { background:#d6e2ff; border-color:#8aa7ff; }
-
-/* =========================================
-   MODAL – FONDO Y CONTENIDO
-========================================= */
-#modal-bg {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-#modal-bg:not(.hidden) {
-  display:flex;
-}
-
-#modal-content {
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  width:90%;
-  max-width:420px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.25);
-}
-
-/* Título modal */
-#modal-content h3 {
-  margin:0 0 15px;
-  font-size:20px;
-  text-align:center;
-}
-
-/* Formularios */
-#modal-content label {
-  display:block;
-  margin:6px 0 2px;
-  font-size:16px;
-  font-weight:600;
-}
-
-#modal-content input,
-#modal-content select {
-  width:100%;
-  padding:8px;
-  font-size:16px;
-  border:1px solid #ccc;
-  border-radius:6px;
-  margin-bottom:6px;
-  box-sizing:border-box;
-  background:#fafafa;
-}
-
-/* Botones */
-#modal-content button {
-  font-size:16px;
-  padding:10px 14px;
-  border-radius:8px;
-  border:none;
-  margin-right:8px;
-  margin-top:10px;
-}
-
-#modal-content button:first-of-type {
-  background:#4caf50;
-  color:white;
-}
-#modal-content button:last-of-type {
-  background:#ccc;
-}
-
-/* =========================================
-   OPCIONES DE JUGADORAS (checkbox alineado)
-========================================= */
-label.jug-opt {
-  display:flex !important;
-  flex-direction:row !important;
-  justify-content:space-between !important;
-  align-items:center !important;
-  width:100%;
-  padding:6px 0;
-  border-bottom:1px solid #eee;
-  font-size:16px;
-  color:#000 !important;
-}
-
-label.jug-opt span {
-  flex:1 1 auto;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  margin-right:8px;
-}
-
-label.jug-opt input[type="checkbox"] {
-  width:22px;
-  height:22px;
-  margin:0;
-  flex:0 0 auto;
-  accent-color:#0077ff;
-}
-/* =========================================
-   Forzar visibilidad del alias de jugadora
-   ========================================= */
-
-label.jug-opt {
-  display: flex !important;
-  flex-direction: row !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  width: 100% !important;
-  min-height: 28px !important;
-  padding: 4px 0 !important;
-  border-bottom: 1px solid #eee !important;
-  box-sizing: border-box !important;
-  overflow: visible !important;
-}
-
-label.jug-opt span {
-  display: block !important;
-  flex: 1 1 auto !important;
-  font-size: 16px !important;
-  line-height: 20px !important;
-  color: #000 !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  text-indent: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  height: auto !important;
-  max-width: 100% !important;
-}
-
-label.jug-opt input[type="checkbox"] {
-  flex: 0 0 auto !important;
-  width: 22px !important;
-  height: 22px !important;
-  margin-left: 8px !important;
-  transform: none !important;
-}
-
-#sync-status-bar {
-  animation: fadein 0.3s ease;
-}
-
-@keyframes fadein {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-/* Hacer que la clase hidden realmente oculte */
-.hidden {
+/* ======== MODAL ======== */
+#modal-bg.hidden {
   display: none !important;
 }
 
-/* Evitar que el overflow bloquee el modal */
-html, body {
-  overflow: visible !important;
-}
-
-/* Asegurar ocultación y visibilidad modal */
-.hidden { display: none !important; }
-html, body { overflow: visible !important; }
-
-/* modal (asegurado) */
 #modal-bg {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: none;
+  background: rgba(0,0,0,0.25);
+  display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
 }
-#modal-bg:not(.hidden) { display:flex; }
+
 #modal-content {
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  width:90%;
-  max-width:420px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.25);
+  background: white;
+  padding: 24px;
+  width: 90%;
+  max-width: 420px;
+  border-radius: 22px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 
+#modal-content h3 {
+  margin-top: 0;
+}
 
+/* ======== VISTAS ======== */
+.view {
+  display: none;
+}
 
+.view.active {
+  display: block;
+}
