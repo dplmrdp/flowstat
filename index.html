@@ -1,181 +1,114 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FlowStat</title>
+    <link rel="stylesheet" href="style.css" />
 
-<head>
-  <meta charset="utf-8" />
+    <!-- ICONO -->
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="icon" sizes="192x192" href="icons/icon-192x192.png">
+  </head>
 
-  <!-- =========================================
-       VIEWPORT OPTIMIZADO PARA PWA
-       ========================================= -->
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1,
-                 user-scalable=no, viewport-fit=cover">
+  <body>
 
-  <title>FlowStat</title>
-
-  <!-- =========================================
-       PWA MANIFEST / ICONOS / SERVICE WORKER
-       ========================================= -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js");
-    }
-  </script>
-
-  <!-- =========================================
-       ESTILOS PRINCIPALES
-       ========================================= -->
-  <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-
-<!-- =========================================================
-     APLICACIÓN (SPA)
-     Cada sección es una pantalla distinta.
-     Solo una está visible en un momento dado.
-     Se muestra/oculta dinámicamente desde app.js
-========================================================= -->
-
-<div id="app" class="app">
-
-  <!-- =====================================================
-       VISTA: INICIO
-       Comentario:
-       - Pantalla principal de navegación
-       - Desde aquí saltamos a Partidos, Equipos o Jugadoras
-  ====================================================== -->
-  <section id="view-home" class="view active">
-    <h1>FlowStat</h1>
-
-    <div class="menu-buttons">
-      <button class="menu-btn" onclick="FS.router.go('partidos')">PARTIDOS</button>
-      <button class="menu-btn" onclick="FS.router.go('equipos')">EQUIPOS</button>
-      <button class="menu-btn" onclick="FS.router.go('jugadoras')">JUGADOR@S</button>
-    </div>
-  </section>
-
-
-  <!-- =====================================================
-       VISTA: PARTIDOS
-       Comentario:
-       - Lista de partidos guardados
-       - Crear nuevo partido
-       - Entrar a sets / toma de datos
-  ====================================================== -->
-  <section id="view-partidos" class="view hidden">
-
-    <h2>Partidos</h2>
-
-    <button onclick="FS.partidos.create()">➕ Crear partido</button>
-
-    <div id="lista-partidos"></div>
-
-    <button class="back-btn" onclick="FS.router.go('home')">← Volver</button>
-
-  </section>
-
-
-  <!-- =====================================================
-       VISTA: EQUIPOS
-       Comentario:
-       - Lista de equipos
-       - Crear equipo
-       - Añadir/quitar jugadoras
-  ====================================================== -->
-  <section id="view-equipos" class="view hidden">
-
-    <h2>Equipos</h2>
-
-    <button onclick="FS.equipos.create()">➕ Crear equipo</button>
-
-    <div id="lista-equipos"></div>
-
-    <button class="back-btn" onclick="FS.router.go('home')">← Volver</button>
-
-  </section>
-
-
-  <!-- =====================================================
-       VISTA: JUGADORAS
-       Comentario:
-       - Registro de jugadoras
-       - Asignación a equipos
-       - Edición / borrado
-  ====================================================== -->
-  <section id="view-jugadoras" class="view hidden">
-
-    <h2>Jugadoras</h2>
-
-    <button onclick="FS.jugadoras.create()">➕ Crear jugadora</button>
-
-    <div id="lista-jugadoras"></div>
-
-    <button class="back-btn" onclick="FS.router.go('home')">← Volver</button>
-
-  </section>
-
-
-  <!-- =====================================================
-       VISTA: TOMA DE DATOS DEL SET
-       Comentario:
-       - Esta es la vista que ya tienes implementada
-       - La moveremos aquí como módulo independiente
-  ====================================================== -->
-  <section id="view-set" class="view hidden">
-
-    <h2 id="titulo-set">Set</h2>
-
-    <!-- FILA SUPERIOR -->
-    <div class="top-row">
-      <div class="players" id="players"></div>
-
-      <button class="action-btn" id="btn-change">Cambio</button>
-      <button class="action-btn" id="btn-finish">Fin set</button>
-      <button class="icon-btn" id="btn-undo">↺</button>
+    <!-- ============================================
+         FIREBASE STATUS PANEL (diagnóstico)
+    ============================================= -->
+    <div id="firebase-status"
+        style="background:#eef2ff;padding:10px;margin:10px;border-radius:8px;font-size:14px;display:none;">
+      Verificando Firebase…
     </div>
 
-    <!-- GRID DE ACCIONES -->
-    <div class="groups" id="groups"></div>
+    <!-- ============================================
+         APP ROOT
+    ============================================= -->
+    <div id="app" class="app">
 
-    <!-- Botón volver -->
-    <button class="back-btn" onclick="FS.sets.exitSet()">← Terminar set</button>
+      <!-- PANTALLAS DEL SPA -->
 
-  </section>
+      <!-- HOME -->
+      <section id="view-home" class="view active">
+        <h1>FlowStat</h1>
+        <button onclick="FS.router.go('partidos')">Partidos</button>
+        <button onclick="FS.router.go('equipos')">Equipos</button>
+        <button onclick="FS.router.go('jugadoras')">Jugadoras</button>
+      </section>
 
-</div>
-  
-<!-- =========================================
-     MODAL REUTILIZABLE PARA FORMULARIOS
-========================================= -->
-<div id="modal-bg" class="hidden modal-bg">
-  <div id="modal-content" class="modal-content"></div>
-</div>
+      <!-- PARTIDOS -->
+      <section id="view-partidos" class="view hidden">
+        <h2>Partidos</h2>
+        <button onclick="FS.partidos.create()">➕ Nuevo partido</button>
+        <div id="lista-partidos"></div>
+        <button onclick="FS.router.go('home')">🔙 Volver</button>
+      </section>
 
-<!-- =========================================================
-     ARCHIVOS DE LÓGICA (MÓDULOS SPA)
-========================================================= -->
+      <!-- EQUIPOS -->
+      <section id="view-equipos" class="view hidden">
+        <h2>Equipos</h2>
+        <button onclick="FS.equipos.create()">➕ Crear equipo</button>
+        <div id="lista-equipos"></div>
+        <button onclick="FS.router.go('home')">🔙 Volver</button>
+      </section>
 
-<script src="router.js"></script>
-<script src="state.js"></script>
-<script src="storage.js"></script>
-<script src="ui_partidos.js"></script>
-<script src="ui_equipos.js"></script>
-<script src="ui_jugadoras.js"></script>
-<script src="ui_set.js"></script>
-<script src="modal.js"></script>
-<script type="module" src="firebase-init.js"></script>
-<script src="app.js"></script>
+      <!-- JUGADORAS -->
+      <section id="view-jugadoras" class="view hidden">
+        <h2>Jugadoras</h2>
+        <button onclick="FS.jugadoras.create()">➕ Crear jugadora</button>
+        <div id="lista-jugadoras"></div>
+        <button onclick="FS.router.go('home')">🔙 Volver</button>
+      </section>
 
-</body>
-  <div id="firebase-status"
-     style="background:#eef2ff;padding:10px;margin:10px;border-radius:8px;font-size:14px;display:none;">
-  Verificando Firebase…
-</div>
+      <!-- SET / REGISTRO -->
+      <section id="view-set" class="view hidden">
+        <h2 id="titulo-set">Set</h2>
 
+        <div class="top-row">
+          <div class="players" id="players-container"></div>
+
+          <button id="btn-change" class="action-btn">Cambiar</button>
+          <button id="btn-finish" class="action-btn">Finalizar set</button>
+          <div id="undo-container"></div>
+        </div>
+
+        <div class="groups" id="groups-container"></div>
+
+        <button onclick="FS.router.go('partidos')">🔙 Volver</button>
+      </section>
+
+    </div>
+
+    <!-- ============================================
+         MODAL
+    ============================================= -->
+    <div id="modal-bg" class="hidden modal-bg">
+      <div id="modal-content" class="modal-content"></div>
+    </div>
+
+    <!-- ============================================
+         SCRIPT LOADING ORDER — IMPORTANT
+    ============================================= -->
+
+    <!-- 1) FIREBASE MUST LOAD FIRST -->
+    <script type="module" src="firebase-init.js"></script>
+
+    <!-- 2) CORE STATE / STORAGE -->
+    <script src="state.js"></script>
+    <script src="storage.js"></script>
+
+    <!-- 3) ROUTER + MODAL -->
+    <script src="router.js"></script>
+    <script src="modal.js"></script>
+
+    <!-- 4) UI MODULES -->
+    <script src="ui_partidos.js"></script>
+    <script src="ui_equipos.js"></script>
+    <script src="ui_jugadoras.js"></script>
+    <script src="ui_set.js"></script>
+
+    <!-- 5) APP BOOTSTRAP -->
+    <script src="app.js"></script>
+
+  </body>
 </html>
