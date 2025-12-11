@@ -30,6 +30,7 @@
         <button onclick="FS.router.go('partidos')">Partidos</button>
         <button onclick="FS.router.go('equipos')">Equipos</button>
         <button onclick="FS.router.go('jugadoras')">Jugadoras</button>
+        <button id="debug-open-modal">DEBUG abrir modal</button>
       </section>
 
       <!-- PARTIDOS -->
@@ -108,6 +109,15 @@
 
     <!-- App Bootstrap -->
     <script src="app.js"></script>
+    
+    <script>
+  document.addEventListener("DOMContentLoaded", function(){
+    const dbg = document.getElementById("debug-open-modal");
+    if (dbg) dbg.addEventListener("click", function(){
+      FS.modal.open('<h3>Debug modal</h3><p>Si ves esto significa que modal.open ejecutó y #modal-bg es visible.</p><button onclick="FS.modal.close()">Cerrar</button>');
+    });
+  });
+</script>
 
   </body>
 </html>
