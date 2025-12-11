@@ -103,4 +103,41 @@ if (!FIREBASE_CONFIG || !FIREBASE_CONFIG.projectId || FIREBASE_CONFIG.apiKey ===
       return { ok: false, error: err };
     }
   };
+  /* ========== Jugadoras / Equipos helpers ========== */
+
+// Guardar/actualizar una jugadora en /jugadoras/{id}
+FS.firebase.saveJugadora = async function (id, jugadoraObj) {
+  try {
+    const ref = doc(FS.firebase.db, "jugadoras", id);
+    await setDoc(ref, Object.assign({}, jugadoraObj, { updatedAt: serverTimestamp() }), { merge: true });
+    return { ok: true };
+  } catch (err) {
+    console.error("FS saveJugadora error:", err);
+    return { ok: false, error: err };
+  }
+};
+
+// Obtener todas las jugadoras (lista)
+FS.firebase.getJugadoras = async function () {
+  try {
+    const snap = await getDocs(collection(FS.firebase.db, "jugadoras"));
+    return { ok: true, docs: snap.docs.map(d => ({ id: d.id, data: d.data() })) };
+  } catch (err) {
+    console.error("FS getJugadoras error:", err);
+    return { ok: false, error: err };
+  }
+};
+
+// Guardar/actualizar un equipo en /equipos/{id}
+FS.firebase.saveEquipo = async function (id, equipoObj) {
+  try {
+    const ref = doc(FS.firebase.db, "equipos", id);
+    await setDoc(ref, Object.assign({}, equipoObj, { updatedAt: serverTimestamp() }), { merge: true });
+    return { ok: true };
+  } catch (err) {
+    console.error("FS saveEquipo error:", err);
+    return { ok: false, error: err };
+  }
+};
+
 }
