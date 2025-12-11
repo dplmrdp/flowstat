@@ -1,16 +1,8 @@
-/* ============================================================
-   ui_jugadoras.js
-   Interfaz de gestión de jugadoras para FlowStat
-   ============================================================ */
-
+/* ui_jugadoras.js — versión Firestore-aware */
 window.FS = window.FS || {};
 FS.jugadoras = {};
 
-
-/* ============================================================
-   MOSTRAR LISTA DE JUGADORAS
-   ============================================================ */
-
+/* Render lista */
 FS.jugadoras.renderLista = function () {
   const cont = document.getElementById("lista-jugadoras");
   cont.innerHTML = "";
@@ -19,7 +11,6 @@ FS.jugadoras.renderLista = function () {
   const equipos = FS.state.equipos;
 
   const ids = Object.keys(jugadoras);
-
   if (ids.length === 0) {
     cont.innerHTML = "<p>No hay jugadoras registradas.</p>";
     return;
@@ -27,9 +18,7 @@ FS.jugadoras.renderLista = function () {
 
   ids.forEach(id => {
     const j = jugadoras[id];
-
-    // Mostrar lista de equipos a los que pertenece
-    const etiquetaEquipos = j.equipos.map(eid => FS.state.equipos[eid]?.nombre || "(?)").join(", ");
+    const etiquetaEquipos = j.equipos?.map(eid => FS.state.equipos[eid]?.nombre || "(?)").join(", ");
 
     const div = document.createElement("div");
     div.className = "jugadora-item";
@@ -38,51 +27,29 @@ FS.jugadoras.renderLista = function () {
       border-radius: 8px;
       background: white;
       margin-bottom: 8px;
-      box-shadow: 0 0 4px rgba(0,0,0,0.1);
+      box-shadow: 0 0 4px rgba(0,0,0,0.08);
     `;
 
     div.innerHTML = `
-  <strong>${j.alias}</strong> (${j.nombre})<br>
-  Dorsal: ${j.dorsal || "—"}<br>
-  Posición: ${j.posicion || "—"}<br>
-  <small>Equipos: ${etiquetaEquipos || "—"}</small><br><br>
+      <strong>${j.alias}</strong> (${j.nombre})<br>
+      Dorsal: ${j.dorsal || "—"} — Posición: ${j.posicion || "—"}<br>
+      <small>Equipos: ${etiquetaEquipos || "—"}</small><br><br>
 
-  <button onclick="FS.jugadoras.edit('${id}')">✏ Editar</button>
-  <button onclick="FS.jugadoras.asignarEquipos('${id}')">👥 Equipos</button>
-  <button onclick="FS.jugadoras.borrar('${id}')">🗑 Borrar</button>
-`;
-
-
+      <button onclick="FS.jugadoras.edit('${id}')">✏ Editar</button>
+      <button onclick="FS.jugadoras.asignarEquipos('${id}')">👥 Equipos</button>
+      <button onclick="FS.jugadoras.borrar('${id}')">🗑 Borrar</button>
+    `;
     cont.appendChild(div);
   });
 };
 
-
-/* ============================================================
-   CREAR JUGADORA
-   ============================================================ */
-
+/* abrir modal crear */
 FS.jugadoras.create = function () {
-
- const form = `
-  <h3>Nueva jugadora</h3>
-
-  <div class="field">
-    <label>Nombre completo</label>
-    <input id="fj-nombre" type="text" />
-  </div>
-
-  <div class="field">
-    <label>Alias (máx 7 chars)</label>
-    <input id="fj-alias" type="text" maxlength="7" />
-  </div>
-
-  <div class="field">
-    <label>Dorsal (opcional)</label>
-    <input id="fj-dorsal" type="number" min="0" />
-  </div>
-
-  <div class="field">
+  const form = `
+    <h3>Nueva jugadora</h3>
+    <label>Nombre completo</label><input id="fj-nombre" type="text" />
+    <label>Alias (máx 7 chars)</label><input id="fj-alias" type="text" maxlength="7" />
+    <label>Dorsal (opcional)</label><input id="fj-dorsal" type="number" min="0" />
     <label>Posición</label>
     <select id="fj-pos">
       <option value="colocadora">Colocadora</option>
@@ -91,55 +58,53 @@ FS.jugadoras.create = function () {
       <option value="líbero">Líbero</option>
       <option value="receptora">Receptora</option>
     </select>
-  </div>
-
-  <button onclick="FS.jugadoras.submitCreate()">Guardar</button>
-  <button onclick="FS.modal.close()">Cancelar</button>
-`;
-
-
+    <br><br>
+    <button onclick="FS.jugadoras.submitCreate()">Guardar</button>
+    <button onclick="FS.modal.close()">Cancelar</button>
+  `;
   FS.modal.open(form);
 };
 
-FS.jugadoras.submitCreate = function () {
+FS.jugadoras.submitCreate = async function () {
   const nombre = document.getElementById("fj-nombre").value.trim();
-  const alias  = document.getElementById("fj-alias").value.trim();
-  const dorsal = document.getElementById("fj-dorsal").value.trim();
-  const pos    = document.getElementById("fj-pos").value;
+  const alias = document.getElementById("fj-alias").value.trim().slice(0,7);
+  const dorsal = (document.getElementById("fj-dorsal").value || "").trim();
+  const posicion = document.getElementById("fj-pos").value;
 
   if (!nombre || !alias) {
     alert("Nombre y alias son obligatorios.");
     return;
   }
 
-  FS.state.crearJugadora(nombre, alias, dorsal, pos);
+  const id = FS.state.crearJugadora(nombre, alias, dorsal, posicion);
   FS.storage.guardarTodo();
+
+  // Intentar subir a Firestore si está activo
+  if (FS.firebase && FS.firebase.enabled) {
+    const r = await FS.firebase.saveJugadora(id, FS.state.jugadoras[id]);
+    if (!r.ok) {
+      console.warn("No se pudo subir jugadora: se encola", r.error);
+      FS.storage._enqueuePendingEntity("jugadora", id, FS.state.jugadoras[id]);
+    }
+  } else {
+    // opcional: encolar para subir luego cuando active Firestore
+    FS.storage._enqueuePendingEntity("jugadora", id, FS.state.jugadoras[id]);
+  }
+
   FS.modal.close();
   FS.jugadoras.renderLista();
 };
 
-
-
-
-/* ============================================================
-   EDITAR JUGADORA
-   ============================================================ */
-
-FS.jugadoras.edit = function (id) {
-  const j = FS.state.jugadoras[id];
+/* editar */
+FS.jugadoras.edit = function (idJugadora) {
+  const j = FS.state.jugadoras[idJugadora];
+  if (!j) return;
 
   const form = `
     <h3>Editar jugadora</h3>
-
-    <label>Nombre completo</label>
-    <input id="fj-nombre" type="text" value="${j.nombre}" />
-
-    <label>Alias (máx 7 chars)</label>
-    <input id="fj-alias" type="text" maxlength="7" value="${j.alias}" />
-
-    <label>Dorsal (opcional)</label>
-    <input id="fj-dorsal" type="number" value="${j.dorsal}" />
-
+    <label>Nombre completo</label><input id="fj-nombre" type="text" value="${j.nombre}" />
+    <label>Alias (7)</label><input id="fj-alias" type="text" maxlength="7" value="${j.alias}" />
+    <label>Dorsal</label><input id="fj-dorsal" type="number" value="${j.dorsal || ''}" />
     <label>Posición</label>
     <select id="fj-pos">
       <option ${j.posicion==="colocadora"?"selected":""} value="colocadora">Colocadora</option>
@@ -150,114 +115,142 @@ FS.jugadoras.edit = function (id) {
     </select>
 
     <br><br>
-    <button onclick="FS.jugadoras.submitEdit('${id}')">Guardar</button>
+    <button onclick="FS.jugadoras.submitEdit('${idJugadora}')">Guardar</button>
     <button onclick="FS.modal.close()">Cancelar</button>
   `;
 
   FS.modal.open(form);
 };
 
-FS.jugadoras.submitEdit = function (id) {
+FS.jugadoras.submitEdit = async function (id) {
   const j = FS.state.jugadoras[id];
-
-  j.nombre   = document.getElementById("fj-nombre").value.trim();
-  j.alias    = document.getElementById("fj-alias").value.trim();
-  j.dorsal   = document.getElementById("fj-dorsal").value.trim();
+  j.nombre = document.getElementById("fj-nombre").value.trim();
+  j.alias = document.getElementById("fj-alias").value.trim().slice(0,7);
+  j.dorsal = (document.getElementById("fj-dorsal").value || "").trim();
   j.posicion = document.getElementById("fj-pos").value;
 
   FS.storage.guardarTodo();
+
+  if (FS.firebase && FS.firebase.enabled) {
+    const r = await FS.firebase.saveJugadora(id, j);
+    if (!r.ok) {
+      console.warn("No se pudo actualizar jugadora en FS:", r.error);
+      FS.storage._enqueuePendingEntity("jugadora", id, j);
+    }
+  } else {
+    FS.storage._enqueuePendingEntity("jugadora", id, j);
+  }
+
   FS.modal.close();
   FS.jugadoras.renderLista();
 };
 
-
-
-
-/* ============================================================
-   BORRAR JUGADORA
-   ============================================================ */
-
-FS.jugadoras.borrar = function (idJugadora) {
-  const j = FS.state.jugadoras[idJugadora];
-
+/* borrar */
+FS.jugadoras.borrar = function (id) {
+  const j = FS.state.jugadoras[id];
   if (!confirm(`¿Eliminar a ${j.nombre}?`)) return;
 
-  // Eliminar de todos los equipos
-  for (const idEquipo in FS.state.equipos) {
-    FS.state.equipos[idEquipo].jugadoras =
-      FS.state.equipos[idEquipo].jugadoras.filter(jid => jid !== idJugadora);
+  // quitar de equipos
+  for (const eid in FS.state.equipos) {
+    FS.state.equipos[eid].jugadoras = FS.state.equipos[eid].jugadoras.filter(x => x !== id);
   }
 
-  // Eliminar del listado global
-  delete FS.state.jugadoras[idJugadora];
-
+  delete FS.state.jugadoras[id];
   FS.storage.guardarTodo();
+
+  // opcional: borrar en Firestore (no implementado por seguridad)
   FS.jugadoras.renderLista();
 };
 
-
-/* ============================================================
-   ASIGNAR JUGADORA A EQUIPOS
-   ============================================================ */
-
+/* asignar equipos (usa modal con checkboxes) */
 FS.jugadoras.asignarEquipos = function (idJugadora) {
   const j = FS.state.jugadoras[idJugadora];
   const equipos = FS.state.equipos;
+  const ids = Object.keys(equipos);
+  if (ids.length === 0) { alert("No hay equipos."); return; }
 
-  let mensaje = `Asignar equipos a ${j.nombre}:\n\n`;
-
-  const idsEquipos = Object.keys(equipos);
-
-  if (idsEquipos.length === 0) {
-    alert("No hay equipos creados todavía.");
-    return;
-  }
-
-  idsEquipos.forEach((id, idx) => {
-    const eq = equipos[id];
-    const asignada = j.equipos.includes(id) ? "✔" : "✖";
-    mensaje += `${idx + 1}. ${eq.nombre} [${asignada}]\n`;
+  let opt = "";
+  ids.forEach(eid => {
+    const eq = equipos[eid];
+    const checked = j.equipos.includes(eid) ? "checked" : "";
+    opt += `<label class="jug-opt"><span>${eq.nombre} (${eq.temporada||''})</span><input type="checkbox" class="chk-eq" value="${eid}" ${checked}></label>`;
   });
 
-  mensaje += "\nIntroduce números separados por comas (ej: 1,3):";
+  const form = `
+    <h3>Asignar equipos a ${j.alias}</h3>
+    ${opt}
+    <br><button onclick="FS.jugadoras.submitAsignarEquipos('${idJugadora}')">Guardar</button>
+    <button onclick="FS.modal.close()">Cancelar</button>
+  `;
 
-  const selec = prompt(mensaje);
-  if (!selec) return;
+  FS.modal.open(form);
+};
 
-  const nums = selec.split(",").map(s => parseInt(s.trim()));
-
-  // Actualizamos lista de equipos asignados
-  const nuevosEquipos = [];
-
-  nums.forEach(n => {
-    const eqId = idsEquipos[n - 1];
-    if (eqId) nuevosEquipos.push(eqId);
-  });
-
-  // Sincronizar asignaciones
-  j.equipos = nuevosEquipos;
-
-  // Mantener equipos actualizados
-  idsEquipos.forEach(idEquipo => {
-    const equipo = equipos[idEquipo];
-    if (j.equipos.includes(idEquipo)) {
-      if (!equipo.jugadoras.includes(idJugadora)) {
-        equipo.jugadoras.push(idJugadora);
-      }
+FS.jugadoras.submitAsignarEquipos = async function (idJugadora) {
+  const checks = document.querySelectorAll(".chk-eq");
+  const j = FS.state.jugadoras[idJugadora];
+  j.equipos = [];
+  checks.forEach(c => {
+    if (c.checked) {
+      j.equipos.push(c.value);
+      // aseguramos la relación inversa
+      const eq = FS.state.equipos[c.value];
+      if (!eq.jugadoras.includes(idJugadora)) eq.jugadoras.push(idJugadora);
     } else {
-      equipo.jugadoras = equipo.jugadoras.filter(jid => jid !== idJugadora);
+      // quitar asociación inversa
+      const eq = FS.state.equipos[c.value];
+      if (eq) eq.jugadoras = eq.jugadoras.filter(x => x !== idJugadora);
     }
   });
 
   FS.storage.guardarTodo();
+
+  // subir cambios de la jugadora y de equipos relacionados
+  if (FS.firebase && FS.firebase.enabled) {
+    const r = await FS.firebase.saveJugadora(idJugadora, j);
+    if (!r.ok) {
+      FS.storage._enqueuePendingEntity("jugadora", idJugadora, j);
+    }
+    // subir equipos afectados (sencillo: subir todos los equipos listados)
+    for (const eid of j.equipos) {
+      const eqObj = FS.state.equipos[eid];
+      if (eqObj) {
+        const re = await FS.firebase.saveEquipo(eid, eqObj);
+        if (!re.ok) FS.storage._enqueuePendingEntity("equipo", eid, eqObj);
+      }
+    }
+  } else {
+    FS.storage._enqueuePendingEntity("jugadora", idJugadora, j);
+  }
+
+  FS.modal.close();
   FS.jugadoras.renderLista();
 };
 
-
-/* ============================================================
-   HOOK: se ejecuta cada vez que se entra a la vista
-   ============================================================ */
-
-FS.jugadoras.onEnter = function () {
+/* onEnter: intentar cargar desde Firestore si está disponible, sino usar local */
+FS.jugadoras.onEnter = async function () {
+  // Primero cargar local (para respuesta rápida)
+  FS.storage.cargarTodo();
   FS.jugadoras.renderLista();
+
+  // Si Firebase disponible, traer del servidor y sobrescribir/merge local
+  if (FS.firebase && FS.firebase.enabled) {
+    const r = await FS.firebase.getJugadoras();
+    if (r.ok) {
+      // Preferimos servidor como fuente de verdad; lo ponemos en local
+      FS.state.jugadoras = {};
+      r.docs.forEach(d => {
+        const id = d.id.startsWith("j_") ? d.id : ("j_" + d.id);
+        // usamos el id tal cual (suponiendo que guardaste con el mismo id)
+        FS.state.jugadoras[id] = Object.assign({ id }, d.data);
+      });
+      // Guardamos local copia
+      FS.storage.guardarTodo();
+      FS.jugadoras.renderLista();
+      // intentar subir pendientes (si existieran)
+      FS.storage.syncPending();
+    } else {
+      console.warn("No se pudieron obtener jugadoras desde Firestore:", r.error);
+    }
+  }
 };
