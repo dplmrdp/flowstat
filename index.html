@@ -5,26 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>FlowStat</title>
     <link rel="stylesheet" href="style.css" />
-
-    <!-- ICONO -->
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    <link rel="icon" sizes="192x192" href="icons/icon-192x192.png">
   </head>
 
   <body>
-
-    <!-- ============================================
-         APP ROOT (todo dentro de #app)
-    ============================================= -->
     <div id="app" class="app">
 
-      <!-- FIREBASE STATUS PANEL -->
-      <div id="firebase-status"
-          style="background:#eef2ff;padding:10px;margin:10px;border-radius:8px;font-size:14px;display:none;">
+      <div id="firebase-status" style="background:#eef2ff;padding:10px;margin:10px;border-radius:8px;font-size:14px;display:none;">
         Verificando Firebase…
       </div>
 
-      <!-- HOME -->
       <section id="view-home" class="view active">
         <h1>FlowStat</h1>
         <button onclick="FS.router.go('partidos')">Partidos</button>
@@ -33,7 +22,7 @@
         <button id="debug-open-modal">DEBUG abrir modal</button>
       </section>
 
-      <!-- PARTIDOS -->
+      <!-- resto de vistas (partidos, equipos, jugadoras, etc.) -->
       <section id="view-partidos" class="view hidden">
         <h2>Partidos</h2>
         <button onclick="FS.partidos.create()">➕ Nuevo partido</button>
@@ -41,7 +30,6 @@
         <button onclick="FS.router.go('home')">🔙 Volver</button>
       </section>
 
-      <!-- EQUIPOS -->
       <section id="view-equipos" class="view hidden">
         <h2>Equipos</h2>
         <button onclick="FS.equipos.create()">➕ Crear equipo</button>
@@ -49,7 +37,6 @@
         <button onclick="FS.router.go('home')">🔙 Volver</button>
       </section>
 
-      <!-- JUGADORAS -->
       <section id="view-jugadoras" class="view hidden">
         <h2>Jugadoras</h2>
         <button onclick="FS.jugadoras.create()">➕ Crear jugadora</button>
@@ -57,67 +44,55 @@
         <button onclick="FS.router.go('home')">🔙 Volver</button>
       </section>
 
-      <!-- SET / REGISTRO -->
       <section id="view-set" class="view hidden">
         <h2 id="titulo-set">Set</h2>
-
         <div class="top-row">
           <div class="players" id="players-container"></div>
           <button id="btn-change" class="action-btn">Cambiar</button>
           <button id="btn-finish" class="action-btn">Finalizar set</button>
           <div id="undo-container"></div>
         </div>
-
         <div class="groups" id="groups-container"></div>
-
         <button onclick="FS.router.go('partidos')">🔙 Volver</button>
       </section>
 
-      <!-- ============================================
-           MODAL (moved inside #app)
-      ============================================= -->
+      <!-- modal dentro de #app -->
       <div id="modal-bg" class="hidden modal-bg">
         <div id="modal-content" class="modal-content"></div>
       </div>
 
     </div> <!-- FIN DE #APP -->
 
-    <!-- ============================================
-         SCRIPT LOADING ORDER — IMPORTANT
-    ============================================= -->
-    
-    <!-- Firebase SDK Compat -->
+    <!-- Firebase SDK (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
-    <!-- Firebase Init -->
-    <script type="module" src="firebase-init.js"></script>
+    <!-- firebase-init se carga COMO SCRIPT NO-MODULE -->
+    <script src="firebase-init.js"></script>
 
-    <!-- Core State + Storage -->
+    <!-- Core -->
     <script src="state.js"></script>
     <script src="storage.js"></script>
 
-    <!-- Router + Modal -->
+    <!-- Router + Modal + UI -->
     <script src="router.js"></script>
     <script src="modal.js"></script>
-
-    <!-- UI Modules -->
     <script src="ui_partidos.js"></script>
     <script src="ui_equipos.js"></script>
     <script src="ui_jugadoras.js"></script>
     <script src="ui_set.js"></script>
 
-    <!-- App Bootstrap -->
+    <!-- bootstrap -->
     <script src="app.js"></script>
-    
+
     <script>
-  document.addEventListener("DOMContentLoaded", function(){
-    const dbg = document.getElementById("debug-open-modal");
-    if (dbg) dbg.addEventListener("click", function(){
-      FS.modal.open('<h3>Debug modal</h3><p>Si ves esto significa que modal.open ejecutó y #modal-bg es visible.</p><button onclick="FS.modal.close()">Cerrar</button>');
-    });
-  });
-</script>
+      document.addEventListener("DOMContentLoaded", function(){
+        const dbg = document.getElementById("debug-open-modal");
+        if (dbg) dbg.addEventListener("click", function(){
+          FS.modal.open('<h3>Debug modal</h3><p>Si ves esto significa que modal.open ejecutó y #modal-bg es visible.</p><button onclick="FS.modal.close()">Cerrar</button>');
+        });
+      });
+    </script>
 
   </body>
 </html>
