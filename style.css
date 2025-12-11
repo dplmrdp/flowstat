@@ -48,14 +48,27 @@ h1, h2, h3 {
 
 /* =========================================================
    SPA — VISTAS
+   ---------------------------------------------------------
+   IMPORTANT: el router usa la clase "hidden" para ocultar la
+   vista (ver router.go in router.js). Por eso la vista se
+   muestra por defecto y se oculta solo cuando existe
+   la clase "hidden" (compatibilidad con index.html).
    ========================================================= */
+
+/* Mostrar vistas por defecto (el router añade/remueve .hidden) */
 .view {
-  display: none;
+  display: block;         /* <-- aquí: mostrar por defecto */
   padding: 16px;
   position: relative;
-  z-index: 1;  /* asegura que la vista activa está encima */
+  z-index: 1;
 }
 
+/* Ocultar cuando el router añade la clase hidden */
+.view.hidden {
+  display: none !important;
+}
+
+/* .view.active sigue siendo válida si alguna lógica la usa */
 .view.active {
   display: block;
 }
@@ -84,7 +97,7 @@ button {
 }
 
 /* =========================================================
-   PANTALLA DE INICIO (FIX: usar #view-home, NO #home-view)
+   PANTALLA DE INICIO (usando #view-home)
    ========================================================= */
 #view-home button {
   display: block;
