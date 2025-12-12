@@ -1,4 +1,4 @@
-// firebase-init.js
+// firebase-init.js — FlowStat Firestore API
 window.FS = window.FS || {};
 
 const FIREBASE_CONFIG = {
@@ -19,17 +19,19 @@ try {
     enabled: true,
     db,
 
-    /* -----------------------------------
+    /* ======================================================
        JUGADORAS
-    ----------------------------------- */
+       ====================================================== */
+
     async saveJugadora(id, data) {
       try {
-        await db.collection("jugadoras").doc(id)
-          .set({
+        await db.collection("jugadoras").doc(id).set(
+          {
             ...data,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true });
-
+          },
+          { merge: true }
+        );
         return { ok: true };
       } catch (e) {
         return { ok: false, error: e };
@@ -41,27 +43,35 @@ try {
         const snap = await db.collection("jugadoras").get();
         return {
           ok: true,
-          docs: snap.docs.map(doc => ({
-            id: doc.id,
-            data: doc.data()
-          }))
+          docs: snap.docs.map(d => ({ id: d.id, data: d.data() }))
         };
       } catch (e) {
         return { ok: false, error: e };
       }
     },
 
-    /* -----------------------------------
+    async deleteJugadora(id) {
+      try {
+        await db.collection("jugadoras").doc(id).delete();
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: e };
+      }
+    },
+
+    /* ======================================================
        EQUIPOS
-    ----------------------------------- */
+       ====================================================== */
+
     async saveEquipo(id, data) {
       try {
-        await db.collection("equipos").doc(id)
-          .set({
+        await db.collection("equipos").doc(id).set(
+          {
             ...data,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true });
-
+          },
+          { merge: true }
+        );
         return { ok: true };
       } catch (e) {
         return { ok: false, error: e };
@@ -73,11 +83,17 @@ try {
         const snap = await db.collection("equipos").get();
         return {
           ok: true,
-          docs: snap.docs.map(doc => ({
-            id: doc.id,
-            data: doc.data()
-          }))
+          docs: snap.docs.map(d => ({ id: d.id, data: d.data() }))
         };
+      } catch (e) {
+        return { ok: false, error: e };
+      }
+    },
+
+    async deleteEquipo(id) {
+      try {
+        await db.collection("equipos").doc(id).delete();
+        return { ok: true };
       } catch (e) {
         return { ok: false, error: e };
       }
