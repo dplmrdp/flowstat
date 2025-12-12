@@ -35,9 +35,10 @@ FS.jugadoras.renderLista = function () {
     div.className = "jugadora-item";
 
     div.innerHTML = `
-      <strong>${escapeHtml(j.alias || "")}</strong> (${escapeHtml(j.nombre || "")})<br>
-      Dorsal: ${escapeHtml(j.dorsal || "—")} — Posición: ${escapeHtml(j.posicion || "—")}<br>
-      <small>Equipos: ${escapeHtml(etiquetaEquipos || "—")}</small><br><br>
+      <strong>${escapeHtml(j.alias)}</strong> (${escapeHtml(j.nombre)})<br>
+      Dorsal: ${escapeHtml(j.dorsal || "—")} — Posición: ${escapeHtml(j.posicion)}<br>
+      <small>Equipos: ${escapeHtml(etiquetaEquipos || "—")}</small>
+      <br><br>
 
       <button class="btn-edit" data-id="${id}">✏ Editar</button>
       <button class="btn-assign" data-id="${id}">👥 Equipos</button>
@@ -47,33 +48,27 @@ FS.jugadoras.renderLista = function () {
     cont.appendChild(div);
   });
 
-  // Delegación de eventos
-  cont.querySelectorAll(".btn-edit").forEach(btn =>
-    btn.onclick = () => FS.jugadoras.edit(btn.dataset.id)
+  cont.querySelectorAll(".btn-edit").forEach(b =>
+    b.onclick = () => FS.jugadoras.edit(b.dataset.id)
   );
 
-  cont.querySelectorAll(".btn-assign").forEach(btn =>
-    btn.onclick = () => FS.jugadoras.asignarEquipos(btn.dataset.id)
+  cont.querySelectorAll(".btn-assign").forEach(b =>
+    b.onclick = () => FS.jugadoras.asignarEquipos(b.dataset.id)
   );
 
-  cont.querySelectorAll(".btn-delete").forEach(btn =>
-    btn.onclick = () => FS.jugadoras.borrar(btn.dataset.id)
+  cont.querySelectorAll(".btn-delete").forEach(b =>
+    b.onclick = () => FS.jugadoras.borrar(b.dataset.id)
   );
 };
 
 
 /* ============================================================
-   CARGA DESDE FIRESTORE
+   CARGAR DESDE FIRESTORE
    ============================================================ */
 
 FS.jugadoras.onEnter = async function () {
   const box = document.getElementById("firebase-status");
   if (box) box.textContent = "Obteniendo jugadoras…";
-
-  if (!FS.firebase || !FS.firebase.enabled) {
-    if (box) box.textContent = "Firestore no disponible.";
-    return;
-  }
 
   try {
     const r = await FS.firebase.getJugadoras();
@@ -86,12 +81,12 @@ FS.jugadoras.onEnter = async function () {
 
       FS.state.jugadoras = map;
       FS.jugadoras.renderLista();
-
-      if (box) box.textContent = "";
     }
-  } catch (err) {
-    console.error("Error cargando jugadoras:", err);
-    if (box) box.textContent = "Error cargando jugadoras.";
+
+    if (box) box.textContent = "";
+  } catch (e) {
+    console.error("Error cargando jugadoras:", e);
+    if (box) box.textContent = "Error al cargar jugadoras.";
   }
 };
 
@@ -101,18 +96,17 @@ FS.jugadoras.onEnter = async function () {
    ============================================================ */
 
 FS.jugadoras.create = function () {
-
   const form = `
     <h3>Nueva jugadora</h3>
 
     <label>Nombre completo</label>
     <input id="fj-nombre" type="text">
 
-    <label>Alias (máx 7 chars)</label>
+    <label>Alias</label>
     <input id="fj-alias" type="text" maxlength="7">
 
-    <label>Dorsal (opcional)</label>
-    <input id="fj-dorsal" type="number" min="0">
+    <label>Dorsal</label>
+    <input id="fj-dorsal" type="number">
 
     <label>Posición</label>
     <select id="fj-pos">
@@ -139,12 +133,12 @@ FS.jugadoras.create = function () {
 
 FS.jugadoras.submitCreate = async function () {
   const nombre = document.getElementById("fj-nombre").value.trim();
-  const alias = document.getElementById("fj-alias").value.trim().slice(0, 7);
-  const dorsal = document.getElementById("fj-dorsal").value || "";
+  const alias = document.getElementById("fj-alias").value.trim();
+  const dorsal = document.getElementById("fj-dorsal").value;
   const pos = document.getElementById("fj-pos").value;
 
   if (!nombre || !alias) {
-    alert("Nombre y alias son obligatorios.");
+    alert("Nombre y alias obligatorios");
     return;
   }
 
@@ -153,22 +147,22 @@ FS.jugadoras.submitCreate = async function () {
   FS.state.jugadoras[id] = {
     id,
     nombre,
-    alias,
+    alias: alias.slice(0, 7),
     dorsal,
     posicion: pos,
     equipos: []
   };
 
   const r = await FS.firebase.saveJugadora(id, FS.state.jugadoras[id]);
-  if (!r.ok) alert("Error subiendo a Firestore");
+  if (!r.ok) alert("Error guardando en Firestore");
 
   FS.modal.close();
-  FS.jugadoras.onEnter(); // recargar desde Firestore
+  FS.jugadoras.onEnter();
 };
 
 
 /* ============================================================
-   EDITAR JUGADORA
+   EDITAR
    ============================================================ */
 
 FS.jugadoras.edit = function (id) {
@@ -212,13 +206,13 @@ FS.jugadoras.edit = function (id) {
 FS.jugadoras.submitEdit = async function (id) {
   const j = FS.state.jugadoras[id];
 
-  j.nombre = document.getElementById("fj-nombre").value.trim();
-  j.alias = document.getElementById("fj-alias").value.trim().slice(0, 7);
-  j.dorsal = document.getElementById("fj-dorsal").value.trim();
-  j.posicion = document.getElementById("fj-pos").value;
+  j.nombre = fj-nombre.value.trim();
+  j.alias = fj-alias.value.trim().slice(0,7);
+  j.dorsal = fj-dorsal.value;
+  j.posicion = fj-pos.value;
 
   const r = await FS.firebase.saveJugadora(id, j);
-  if (!r.ok) alert("Error subiendo a Firestore");
+  if (!r.ok) alert("Error guardando en Firestore");
 
   FS.modal.close();
   FS.jugadoras.onEnter();
@@ -226,21 +220,27 @@ FS.jugadoras.submitEdit = async function (id) {
 
 
 /* ============================================================
-   BORRAR JUGADORA
+   BORRAR JUGADORA DEFINITIVO
    ============================================================ */
 
 FS.jugadoras.borrar = async function (id) {
   const j = FS.state.jugadoras[id];
   if (!confirm(`¿Eliminar a ${j.nombre}?`)) return;
 
-  // Eliminar referencias desde equipos
+  // Firestore
+  const r = await FS.firebase.deleteJugadora(id);
+  if (!r.ok) {
+    alert("Error borrando en Firestore");
+    return;
+  }
+
+  delete FS.state.jugadoras[id];
+
+  // limpiar relaciones en equipos
   Object.values(FS.state.equipos).forEach(eq => {
     eq.jugadoras = eq.jugadoras.filter(jid => jid !== id);
   });
 
-  delete FS.state.jugadoras[id];
-
-  // No borramos en Firestore por seguridad
   FS.jugadoras.onEnter();
 };
 
@@ -251,28 +251,27 @@ FS.jugadoras.borrar = async function (id) {
 
 FS.jugadoras.asignarEquipos = function (id) {
   const j = FS.state.jugadoras[id];
-  const equipos = FS.state.equipos || {};
+  const eqs = FS.state.equipos;
 
-  const ids = Object.keys(equipos);
+  const ids = Object.keys(eqs);
   if (ids.length === 0) {
     alert("No hay equipos registrados.");
     return;
   }
 
- let opt = "";
-ids.forEach(eid => {
-  const eq = equipos[eid];
-  const checked = (j.equipos || []).includes(eid) ? "checked" : "";
+  let opt = "";
+  ids.forEach(eid => {
+    const eq = eqs[eid];
+    const checked = (j.equipos || []).includes(eid) ? "checked" : "";
 
-  opt += `
-    <label class="jug-opt">
-      <input type="checkbox" class="chk-eq" value="${eid}" ${checked}>
-      <span class="nombre-equipo">${escapeHtml(eq.nombre)}</span>
-      <span class="temp-equipo">(${escapeHtml(eq.temporada)})</span>
-    </label>
-  `;
-});
-
+    opt += `
+      <label class="jug-opt">
+        <input type="checkbox" class="chk-eq" value="${eid}" ${checked}>
+        <span class="nombre-equipo">${escapeHtml(eq.nombre)}</span>
+        <span class="temp-equipo">(${escapeHtml(eq.temporada)})</span>
+      </label>
+    `;
+  });
 
   const form = `
     <h3>Asignar equipos a ${escapeHtml(j.alias)}</h3>
@@ -293,12 +292,10 @@ ids.forEach(eid => {
 
 
 FS.jugadoras.submitAsignarEquipos = async function (id) {
-  const checks = document.querySelectorAll(".chk-eq");
   const j = FS.state.jugadoras[id];
 
   j.equipos = [];
-
-  checks.forEach(c => {
+  document.querySelectorAll(".chk-eq").forEach(c => {
     if (c.checked) j.equipos.push(c.value);
   });
 
@@ -314,13 +311,13 @@ FS.jugadoras.submitAsignarEquipos = async function (id) {
    UTILS
    ============================================================ */
 
-function escapeHtml(str) {
-  return String(str || "")
+function escapeHtml(s) {
+  return String(s || "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
 }
 
-function escapeAttr(str) {
-  return escapeHtml(str);
+function escapeAttr(s) {
+  return escapeHtml(s);
 }
