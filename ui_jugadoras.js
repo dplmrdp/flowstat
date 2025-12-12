@@ -259,17 +259,20 @@ FS.jugadoras.asignarEquipos = function (id) {
     return;
   }
 
-  let opt = "";
-  ids.forEach(eid => {
-    const eq = equipos[eid];
-    const checked = (j.equipos || []).includes(eid) ? "checked" : "";
-    opt += `
-      <label class="jug-opt">
-        <span>${escapeHtml(eq.nombre)} (${escapeHtml(eq.temporada)})</span>
-        <input type="checkbox" class="chk-eq" value="${eid}" ${checked}>
-      </label>
-    `;
-  });
+ let opt = "";
+ids.forEach(eid => {
+  const eq = equipos[eid];
+  const checked = (j.equipos || []).includes(eid) ? "checked" : "";
+
+  opt += `
+    <label class="jug-opt">
+      <input type="checkbox" class="chk-eq" value="${eid}" ${checked}>
+      <span class="nombre-equipo">${escapeHtml(eq.nombre)}</span>
+      <span class="temp-equipo">(${escapeHtml(eq.temporada)})</span>
+    </label>
+  `;
+});
+
 
   const form = `
     <h3>Asignar equipos a ${escapeHtml(j.alias)}</h3>
