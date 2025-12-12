@@ -97,6 +97,7 @@ FS.equipos.onEnter = async function () {
    ============================================================ */
 
 FS.equipos.create = function () {
+
   const form = `
     <h3>Nuevo equipo</h3>
 
@@ -124,8 +125,8 @@ FS.equipos.create = function () {
   FS.modal.open(form);
 
   setTimeout(() => {
-    fe-save.onclick = FS.equipos.submitCreate;
-    fe-cancel.onclick = FS.modal.close;
+    document.getElementById("fe-save").onclick = FS.equipos.submitCreate;
+    document.getElementById("fe-cancel").onclick = FS.modal.close;
   }, 20);
 };
 
@@ -157,12 +158,12 @@ FS.equipos.submitCreate = async function () {
   }
 
   FS.modal.close();
-  FS.equipos.renderLista();
+  FS.equipos.onEnter(); // recargar desde Firestore
 };
 
 
 /* ============================================================
-   EDITAR
+   EDITAR EQUIPO
    ============================================================ */
 
 FS.equipos.editar = function (id) {
@@ -195,8 +196,8 @@ FS.equipos.editar = function (id) {
   FS.modal.open(form);
 
   setTimeout(() => {
-    fe-save-edit.onclick = () => FS.equipos.submitEdit(id);
-    fe-cancel-edit.onclick = FS.modal.close;
+    document.getElementById("fe-save-edit").onclick = () => FS.equipos.submitEdit(id);
+    document.getElementById("fe-cancel-edit").onclick = FS.modal.close;
   }, 20);
 };
 
@@ -204,15 +205,15 @@ FS.equipos.editar = function (id) {
 FS.equipos.submitEdit = async function (id) {
   const eq = FS.state.equipos[id];
 
-  eq.nombre = fe-nombre.value.trim();
-  eq.categoria = fe-cat.value;
-  eq.temporada = fe-temp.value.trim();
+  eq.nombre = document.getElementById("fe-nombre").value.trim();
+  eq.categoria = document.getElementById("fe-cat").value;
+  eq.temporada = document.getElementById("fe-temp").value.trim();
 
   const r = await FS.firebase.saveEquipo(id, eq);
   if (!r.ok) alert("Error guardando en Firestore");
 
   FS.modal.close();
-  FS.equipos.renderLista();
+  FS.equipos.onEnter();
 };
 
 
@@ -246,8 +247,8 @@ FS.equipos.editarJugadoras = function (id) {
   FS.modal.open(form);
 
   setTimeout(() => {
-    fe-save-j.onclick = () => FS.equipos.submitAsignarJugadoras(id);
-    fe-cancel-j.onclick = FS.modal.close;
+    document.getElementById("fe-save-j").onclick = () => FS.equipos.submitAsignarJugadoras(id);
+    document.getElementById("fe-cancel-j").onclick = FS.modal.close;
   }, 20);
 };
 
@@ -264,7 +265,7 @@ FS.equipos.submitAsignarJugadoras = async function (id) {
   if (!r.ok) alert("Error subiendo jugadoras del equipo");
 
   FS.modal.close();
-  FS.equipos.renderLista();
+  FS.equipos.onEnter();
 };
 
 
@@ -278,7 +279,7 @@ FS.equipos.borrar = async function (id) {
 
   delete FS.state.equipos[id];
 
-  // No eliminamos de Firestore por seguridad (como jugadoras)
+  // (no borramos en Firestore, como en jugadoras)
   FS.equipos.renderLista();
 };
 
