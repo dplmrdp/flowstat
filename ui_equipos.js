@@ -1,5 +1,5 @@
 /* ============================================================
-   ui_equipos.js — Gestión de Equipos con Firestore
+   ui_equipos.js — Gestión de equipos usando SOLO Firestore
    ============================================================ */
 
 window.FS = window.FS || {};
@@ -7,7 +7,7 @@ FS.equipos = {};
 
 
 /* ============================================================
-   LISTA DE EQUIPOS
+   RENDER LISTA
    ============================================================ */
 
 FS.equipos.renderLista = function () {
@@ -24,7 +24,6 @@ FS.equipos.renderLista = function () {
 
   ids.forEach(id => {
     const eq = equipos[id];
-    if (!eq) return;
 
     const div = document.createElement("div");
     div.className = "equipo-item";
@@ -44,22 +43,52 @@ FS.equipos.renderLista = function () {
     cont.appendChild(div);
   });
 
-  // Delegación de eventos
-  cont.querySelectorAll(".btn-ver").forEach(b => {
-    b.onclick = () => FS.equipos.verJugadoras(b.dataset.id);
-  });
+  cont.querySelectorAll(".btn-ver").forEach(b =>
+    b.onclick = () => FS.equipos.verJugadoras(b.dataset.id)
+  );
+  cont.querySelectorAll(".btn-edit").forEach(b =>
+    b.onclick = () => FS.equipos.editar(b.dataset.id)
+  );
+  cont.querySelectorAll(".btn-gestionar").forEach(b =>
+    b.onclick = () => FS.equipos.editarJugadoras(b.dataset.id)
+  );
+  cont.querySelectorAll(".btn-delete").forEach(b =>
+    b.onclick = () => FS.equipos.borrar(b.dataset.id)
+  );
+};
 
-  cont.querySelectorAll(".btn-edit").forEach(b => {
-    b.onclick = () => FS.equipos.editar(b.dataset.id);
-  });
 
-  cont.querySelectorAll(".btn-gestionar").forEach(b => {
-    b.onclick = () => FS.equipos.editarJugadoras(b.dataset.id);
-  });
+/* ============================================================
+   CARGA DESDE FIRESTORE
+   ============================================================ */
 
-  cont.querySelectorAll(".btn-delete").forEach(b => {
-    b.onclick = () => FS.equipos.borrar(b.dataset.id);
-  });
+FS.equipos.onEnter = async function () {
+  const box = document.getElementById("firebase-status");
+  if (box) box.textContent = "Obteniendo equipos…";
+
+  if (!FS.firebase || !FS.firebase.enabled) {
+    if (box) box.textContent = "Firestore no disponible.";
+    return;
+  }
+
+  try {
+    const r = await FS.firebase.getEquipos();
+
+    if (r.ok) {
+      const map = {};
+      r.docs.forEach(d => {
+        map[d.id] = { id: d.id, ...d.data };
+      });
+
+      FS.state.equipos = map;
+      FS.equipos.renderLista();
+
+      if (box) box.textContent = "";
+    }
+  } catch (err) {
+    console.error("Error cargando equipos:", err);
+    if (box) box.textContent = "Error cargando equipos.";
+  }
 };
 
 
@@ -68,7 +97,6 @@ FS.equipos.renderLista = function () {
    ============================================================ */
 
 FS.equipos.create = function () {
-
   const form = `
     <h3>Nuevo equipo</h3>
 
@@ -96,13 +124,13 @@ FS.equipos.create = function () {
   FS.modal.open(form);
 
   setTimeout(() => {
-    document.getElementById("fe-save").onclick = FS.equipos.submitCreate;
-    document.getElementById("fe-cancel").onclick = FS.modal.close;
-  }, 50);
+    fe-save.onclick = FS.equipos.submitCreate;
+    fe-cancel.onclick = FS.modal.close;
+  }, 20);
 };
 
 
-FS.equipos.submitCreate = function () {
+FS.equipos.submitCreate = async function () {
   const nombre = document.getElementById("fe-nombre").value.trim();
   const categoria = document.getElementById("fe-cat").value;
   const temporada = document.getElementById("fe-temp").value.trim();
@@ -112,18 +140,20 @@ FS.equipos.submitCreate = function () {
     return;
   }
 
-  const id = FS.state.crearEquipo(nombre, categoria, temporada);
-  FS.storage.guardarTodo();
+  const id = "t_" + crypto.randomUUID();
 
-  // === Subir a Firestore ===
-  if (FS.firebase && FS.firebase.enabled) {
-    FS.firebase.saveEquipo(id, FS.state.equipos[id])
-      .catch(err => {
-        console.warn("Equipo no subido, se encola:", err);
-        FS.storage._enqueuePendingEntity("equipo", id, FS.state.equipos[id]);
-      });
-  } else {
-    FS.storage._enqueuePendingEntity("equipo", id, FS.state.equipos[id]);
+  FS.state.equipos[id] = {
+    id,
+    nombre,
+    categoria,
+    temporada,
+    jugadoras: []
+  };
+
+  // subir a Firestore
+  const r = await FS.firebase.saveEquipo(id, FS.state.equipos[id]);
+  if (!r.ok) {
+    alert("Error subiendo a Firestore.");
   }
 
   FS.modal.close();
@@ -132,11 +162,11 @@ FS.equipos.submitCreate = function () {
 
 
 /* ============================================================
-   EDITAR EQUIPO
+   EDITAR
    ============================================================ */
 
-FS.equipos.editar = function (idEquipo) {
-  const eq = FS.state.equipos[idEquipo];
+FS.equipos.editar = function (id) {
+  const eq = FS.state.equipos[id];
 
   const form = `
     <h3>Editar equipo</h3>
@@ -165,31 +195,21 @@ FS.equipos.editar = function (idEquipo) {
   FS.modal.open(form);
 
   setTimeout(() => {
-    document.getElementById("fe-save-edit").onclick = () => FS.equipos.submitEdit(idEquipo);
-    document.getElementById("fe-cancel-edit").onclick = FS.modal.close;
-  }, 50);
+    fe-save-edit.onclick = () => FS.equipos.submitEdit(id);
+    fe-cancel-edit.onclick = FS.modal.close;
+  }, 20);
 };
 
 
-FS.equipos.submitEdit = function (idEquipo) {
-  const eq = FS.state.equipos[idEquipo];
+FS.equipos.submitEdit = async function (id) {
+  const eq = FS.state.equipos[id];
 
-  eq.nombre = document.getElementById("fe-nombre").value.trim();
-  eq.categoria = document.getElementById("fe-cat").value;
-  eq.temporada = document.getElementById("fe-temp").value.trim();
+  eq.nombre = fe-nombre.value.trim();
+  eq.categoria = fe-cat.value;
+  eq.temporada = fe-temp.value.trim();
 
-  FS.storage.guardarTodo();
-
-  // === Subida a Firestore ===
-  if (FS.firebase && FS.firebase.enabled) {
-    FS.firebase.saveEquipo(idEquipo, eq)
-      .catch(err => {
-        console.warn("Equipo editado no subido, se encola:", err);
-        FS.storage._enqueuePendingEntity("equipo", idEquipo, eq);
-      });
-  } else {
-    FS.storage._enqueuePendingEntity("equipo", idEquipo, eq);
-  }
+  const r = await FS.firebase.saveEquipo(id, eq);
+  if (!r.ok) alert("Error guardando en Firestore");
 
   FS.modal.close();
   FS.equipos.renderLista();
@@ -197,40 +217,20 @@ FS.equipos.submitEdit = function (idEquipo) {
 
 
 /* ============================================================
-   GESTIÓN DE JUGADORAS
+   GESTIONAR JUGADORAS
    ============================================================ */
 
-FS.equipos.verJugadoras = function (idEquipo) {
-  const eq = FS.state.equipos[idEquipo];
-  const jug = FS.state.jugadoras;
-  let msg = `Jugadoras de ${eq.nombre}:\n\n`;
-
-  if (!eq.jugadoras.length) {
-    alert(msg + "(ninguna jugadora)");
-    return;
-  }
-
-  eq.jugadoras.forEach(jid => {
-    const j = jug[jid];
-    msg += `${j.alias} (#${j.dorsal || "-"})\n`;
-  });
-
-  alert(msg);
-};
-
-
-FS.equipos.editarJugadoras = function (idEquipo) {
-  const eq = FS.state.equipos[idEquipo];
+FS.equipos.editarJugadoras = function (id) {
+  const eq = FS.state.equipos[id];
   const jug = FS.state.jugadoras;
 
   let opciones = "";
-
   Object.values(jug).forEach(j => {
     const checked = eq.jugadoras.includes(j.id) ? "checked" : "";
     opciones += `
       <label class="jug-opt">
-        <span>${escapeHtml(j.alias)} (#${escapeHtml(j.dorsal || "-")})</span>
-        <input type="checkbox" class="chk-jug" value="${escapeAttr(j.id)}" ${checked}>
+        <span>${escapeHtml(j.alias)} (#${escapeHtml(j.dorsal||"-")})</span>
+        <input type="checkbox" class="chk-jug" value="${j.id}" ${checked}>
       </label>
     `;
   });
@@ -239,45 +239,29 @@ FS.equipos.editarJugadoras = function (idEquipo) {
     <h3>Jugadoras de ${escapeHtml(eq.nombre)}</h3>
     ${opciones}
     <br>
-    <button id="fj-save-eq">Guardar</button>
-    <button id="fj-cancel-eq">Cancelar</button>
+    <button id="fe-save-j">Guardar</button>
+    <button id="fe-cancel-j">Cancelar</button>
   `;
 
   FS.modal.open(form);
 
   setTimeout(() => {
-    document.getElementById("fj-save-eq").onclick = () => FS.equipos.submitAsignarJugadoras(idEquipo);
-    document.getElementById("fj-cancel-eq").onclick = FS.modal.close;
-  }, 40);
+    fe-save-j.onclick = () => FS.equipos.submitAsignarJugadoras(id);
+    fe-cancel-j.onclick = FS.modal.close;
+  }, 20);
 };
 
 
-FS.equipos.submitAsignarJugadoras = function (idEquipo) {
-  const checks = document.querySelectorAll(".chk-jug");
-  const eq = FS.state.equipos[idEquipo];
+FS.equipos.submitAsignarJugadoras = async function (id) {
+  const eq = FS.state.equipos[id];
+
   eq.jugadoras = [];
-
-  checks.forEach(c => {
-    if (c.checked) {
-      eq.jugadoras.push(c.value);
-
-      const j = FS.state.jugadoras[c.value];
-      if (!j.equipos.includes(idEquipo)) j.equipos.push(idEquipo);
-    }
+  document.querySelectorAll(".chk-jug").forEach(c => {
+    if (c.checked) eq.jugadoras.push(c.value);
   });
 
-  FS.storage.guardarTodo();
-
-  // === Subida a Firestore ===
-  if (FS.firebase && FS.firebase.enabled) {
-    FS.firebase.saveEquipo(idEquipo, eq)
-      .catch(err => {
-        console.warn("Equipo (jugadoras) no subido, se encola:", err);
-        FS.storage._enqueuePendingEntity("equipo", idEquipo, eq);
-      });
-  } else {
-    FS.storage._enqueuePendingEntity("equipo", idEquipo, eq);
-  }
+  const r = await FS.firebase.saveEquipo(id, eq);
+  if (!r.ok) alert("Error subiendo jugadoras del equipo");
 
   FS.modal.close();
   FS.equipos.renderLista();
@@ -288,29 +272,13 @@ FS.equipos.submitAsignarJugadoras = function (idEquipo) {
    BORRAR
    ============================================================ */
 
-FS.equipos.borrar = function (idEquipo) {
-  const eq = FS.state.equipos[idEquipo];
+FS.equipos.borrar = async function (id) {
+  const eq = FS.state.equipos[id];
   if (!confirm(`¿Eliminar el equipo ${eq.nombre}?`)) return;
 
-  // eliminar relaciones en jugadoras
-  Object.values(FS.state.jugadoras).forEach(j => {
-    j.equipos = j.equipos.filter(eid => eid !== idEquipo);
-  });
+  delete FS.state.equipos[id];
 
-  delete FS.state.equipos[idEquipo];
-
-  FS.storage.guardarTodo();
-
-  // No borramos en Firestore por seguridad (solo admin)
-  FS.equipos.renderLista();
-};
-
-
-/* ============================================================
-   HOOK DE ENTRADA
-   ============================================================ */
-
-FS.equipos.onEnter = function () {
+  // No eliminamos de Firestore por seguridad (como jugadoras)
   FS.equipos.renderLista();
 };
 
@@ -318,6 +286,7 @@ FS.equipos.onEnter = function () {
 /* ============================================================
    Utils
    ============================================================ */
+
 function escapeHtml(str) {
   return String(str || "")
     .replaceAll("&", "&amp;")
