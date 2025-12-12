@@ -1,5 +1,5 @@
 /* ============================================================
-   ui_equipos.js — Gestión de equipos usando SOLO Firestore
+   ui_equipos.js — Gestión de equipos SOLO con Firestore
    ============================================================ */
 
 window.FS = window.FS || {};
@@ -34,7 +34,6 @@ FS.equipos.renderLista = function () {
       <small>Temporada: ${escapeHtml(eq.temporada)}</small>
       <br><br>
 
-      <button class="btn-ver" data-id="${id}">👁 Ver jugadoras</button>
       <button class="btn-edit" data-id="${id}">✏ Editar</button>
       <button class="btn-gestionar" data-id="${id}">👥 Gestionar jugadoras</button>
       <button class="btn-delete" data-id="${id}">🗑 Borrar</button>
@@ -43,15 +42,14 @@ FS.equipos.renderLista = function () {
     cont.appendChild(div);
   });
 
-  cont.querySelectorAll(".btn-ver").forEach(b =>
-    b.onclick = () => FS.equipos.verJugadoras(b.dataset.id)
-  );
   cont.querySelectorAll(".btn-edit").forEach(b =>
     b.onclick = () => FS.equipos.editar(b.dataset.id)
   );
+
   cont.querySelectorAll(".btn-gestionar").forEach(b =>
     b.onclick = () => FS.equipos.editarJugadoras(b.dataset.id)
   );
+
   cont.querySelectorAll(".btn-delete").forEach(b =>
     b.onclick = () => FS.equipos.borrar(b.dataset.id)
   );
@@ -59,35 +57,30 @@ FS.equipos.renderLista = function () {
 
 
 /* ============================================================
-   CARGA DESDE FIRESTORE
+   CARGAR DESDE FIRESTORE
    ============================================================ */
 
 FS.equipos.onEnter = async function () {
   const box = document.getElementById("firebase-status");
   if (box) box.textContent = "Obteniendo equipos…";
 
-  if (!FS.firebase || !FS.firebase.enabled) {
-    if (box) box.textContent = "Firestore no disponible.";
-    return;
-  }
-
   try {
     const r = await FS.firebase.getEquipos();
 
     if (r.ok) {
       const map = {};
-      r.docs.forEach(d => {
-        map[d.id] = { id: d.id, ...d.data };
+      r.docs.forEach(doc => {
+        map[doc.id] = { id: doc.id, ...doc.data };
       });
 
       FS.state.equipos = map;
       FS.equipos.renderLista();
-
-      if (box) box.textContent = "";
     }
-  } catch (err) {
-    console.error("Error cargando equipos:", err);
-    if (box) box.textContent = "Error cargando equipos.";
+
+    if (box) box.textContent = "";
+  } catch (e) {
+    console.error("Error al cargar equipos:", e);
+    if (box) box.textContent = "Error al cargar equipos";
   }
 };
 
@@ -97,11 +90,10 @@ FS.equipos.onEnter = async function () {
    ============================================================ */
 
 FS.equipos.create = function () {
-
   const form = `
     <h3>Nuevo equipo</h3>
 
-    <label>Nombre del equipo</label>
+    <label>Nombre</label>
     <input id="fe-nombre" type="text">
 
     <label>Categoría</label>
@@ -115,7 +107,7 @@ FS.equipos.create = function () {
     </select>
 
     <label>Temporada</label>
-    <input id="fe-temp" type="text" placeholder="Ej: 25/26">
+    <input id="fe-temp" type="text">
 
     <br>
     <button id="fe-save">Guardar</button>
@@ -137,7 +129,7 @@ FS.equipos.submitCreate = async function () {
   const temporada = document.getElementById("fe-temp").value.trim();
 
   if (!nombre || !temporada) {
-    alert("Nombre y temporada son obligatorios.");
+    alert("Nombre y temporada obligatorios");
     return;
   }
 
@@ -151,14 +143,14 @@ FS.equipos.submitCreate = async function () {
     jugadoras: []
   };
 
-  // subir a Firestore
   const r = await FS.firebase.saveEquipo(id, FS.state.equipos[id]);
+
   if (!r.ok) {
-    alert("Error subiendo a Firestore.");
+    alert("Error guardando en Firestore");
   }
 
   FS.modal.close();
-  FS.equipos.onEnter(); // recargar desde Firestore
+  FS.equipos.onEnter();
 };
 
 
@@ -179,7 +171,7 @@ FS.equipos.editar = function (id) {
     <select id="fe-cat">
       <option ${eq.categoria==="Benjamín"?"selected":""} value="Benjamín">Benjamín</option>
       <option ${eq.categoria==="Alevín"?"selected":""} value="Alevín">Alevín</option>
-      <option ${eq.categoria==="Infantil"?"selected":""} value="Infantil">Infantil</option>
+      <option ${eq.ccategoria==="Infantil"?"selected":""} value="Infantil">Infantil</option>
       <option ${eq.categoria==="Cadete"?"selected":""} value="Cadete">Cadete</option>
       <option ${eq.categoria==="Juvenil"?"selected":""} value="Juvenil">Juvenil</option>
       <option ${eq.categoria==="Senior"?"selected":""} value="Senior">Senior</option>
@@ -218,20 +210,21 @@ FS.equipos.submitEdit = async function (id) {
 
 
 /* ============================================================
-   GESTIONAR JUGADORAS
+   GESTIONAR JUGADORAS DEL EQUIPO
    ============================================================ */
 
 FS.equipos.editarJugadoras = function (id) {
   const eq = FS.state.equipos[id];
-  const jug = FS.state.jugadoras;
+  const jug = FS.state.jugadoras || {};
 
   let opciones = "";
   Object.values(jug).forEach(j => {
     const checked = eq.jugadoras.includes(j.id) ? "checked" : "";
     opciones += `
       <label class="jug-opt">
-        <span>${escapeHtml(j.alias)} (#${escapeHtml(j.dorsal||"-")})</span>
         <input type="checkbox" class="chk-jug" value="${j.id}" ${checked}>
+        <span class="nombre-equipo">${escapeHtml(j.alias)}</span>
+        <span class="temp-equipo">(#${escapeHtml(j.dorsal || "-")})</span>
       </label>
     `;
   });
@@ -247,7 +240,8 @@ FS.equipos.editarJugadoras = function (id) {
   FS.modal.open(form);
 
   setTimeout(() => {
-    document.getElementById("fe-save-j").onclick = () => FS.equipos.submitAsignarJugadoras(id);
+    document.getElementById("fe-save-j").onclick = () =>
+      FS.equipos.submitAsignarJugadoras(id);
     document.getElementById("fe-cancel-j").onclick = FS.modal.close;
   }, 20);
 };
@@ -262,7 +256,7 @@ FS.equipos.submitAsignarJugadoras = async function (id) {
   });
 
   const r = await FS.firebase.saveEquipo(id, eq);
-  if (!r.ok) alert("Error subiendo jugadoras del equipo");
+  if (!r.ok) alert("Error guardando jugadoras");
 
   FS.modal.close();
   FS.equipos.onEnter();
@@ -270,31 +264,36 @@ FS.equipos.submitAsignarJugadoras = async function (id) {
 
 
 /* ============================================================
-   BORRAR
+   BORRAR EQUIPO DEFINITIVO
    ============================================================ */
 
 FS.equipos.borrar = async function (id) {
   const eq = FS.state.equipos[id];
   if (!confirm(`¿Eliminar el equipo ${eq.nombre}?`)) return;
 
+  const r = await FS.firebase.deleteEquipo(id);
+  if (!r.ok) {
+    alert("Error borrando equipo en Firestore");
+    return;
+  }
+
   delete FS.state.equipos[id];
 
-  // (no borramos en Firestore, como en jugadoras)
-  FS.equipos.renderLista();
+  FS.equipos.onEnter();
 };
 
 
 /* ============================================================
-   Utils
+   UTILS
    ============================================================ */
 
-function escapeHtml(str) {
-  return String(str || "")
+function escapeHtml(s) {
+  return String(s || "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
 }
 
-function escapeAttr(str) {
-  return escapeHtml(str);
+function escapeAttr(s) {
+  return escapeHtml(s);
 }
