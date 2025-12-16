@@ -98,6 +98,46 @@ try {
         return { ok: false, error: e };
       }
     }
+    /* ======================================================
+   PARTIDOS
+   ====================================================== */
+
+async savePartido(id, data) {
+  try {
+    await this.db.collection("partidos").doc(id).set(
+      {
+        ...data,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      },
+      { merge: true }
+    );
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e };
+  }
+},
+
+async getPartidos() {
+  try {
+    const snap = await this.db.collection("partidos").get();
+    return {
+      ok: true,
+      docs: snap.docs.map(d => ({ id: d.id, data: d.data() }))
+    };
+  } catch (e) {
+    return { ok: false, error: e };
+  }
+},
+
+async deletePartido(id) {
+  try {
+    await this.db.collection("partidos").doc(id).delete();
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e };
+  }
+}
+
   };
 
 } catch (err) {
