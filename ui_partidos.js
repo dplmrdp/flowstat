@@ -1,5 +1,5 @@
 /* ============================================================
-   ui_partidos.js — Gestión de Partidos (con campeonato y temporada)
+   ui_partidos.js — PASO 1 (base, sin live)
    ============================================================ */
 
 window.FS = window.FS || {};
@@ -7,171 +7,155 @@ FS.partidos = {};
 
 
 /* ============================================================
-   LISTA DE PARTIDOS
+   ENTRADA A LA VISTA
    ============================================================ */
 
-FS.partidos.renderLista = function () {
+FS.partidos.onEnter = async function () {
+  const box = document.getElementById("firebase-status");
+  if (box) box.textContent = "Cargando partidos…";
+
+  try {
+    const r = await FS.firebase.getPartidos();
+    if (r.ok) {
+      const map = {};
+      r.docs.forEach(d => {
+        map[d.id] = { id: d.id, ...d.data };
+      });
+      FS.state.partidos = map;
+      FS.partidos.render();
+    }
+    if (box) box.textContent = "";
+  } catch (e) {
+    console.error(e);
+    if (box) box.textContent = "Error cargando partidos";
+  }
+};
+
+
+/* ============================================================
+   RENDER PRINCIPAL
+   ============================================================ */
+
+FS.partidos.render = function () {
   const cont = document.getElementById("lista-partidos");
   cont.innerHTML = "";
 
-  const partidos = FS.state.partidos;
-  const equipos = FS.state.equipos;
+  const partidos = Object.values(FS.state.partidos || {});
 
-  const ids = Object.keys(partidos);
+  const preparados = partidos.filter(p => !p.hasStats);
 
-  if (ids.length === 0) {
-    cont.innerHTML = "<p>No hay partidos creados.</p>";
+  if (preparados.length === 0) {
+    cont.innerHTML = "<p class='helper'>No hay partidos preparados.</p>";
     return;
   }
 
-  ids.forEach(id => {
-    const p = partidos[id];
-
-    const eqPropio = equipos[p.equipoPropio]?.nombre || "(Equipo desconocido)";
-
+  preparados.forEach(p => {
     const div = document.createElement("div");
     div.className = "partido-item";
-    div.style = `
-      padding: 10px;
-      background: white;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      box-shadow: 0 0 4px rgba(0,0,0,0.1);
-    `;
 
     div.innerHTML = `
-      <strong>${eqPropio}</strong> vs <strong>${p.equipoRival}</strong><br>
-      <small>Fecha: ${p.fecha}</small><br>
-      <small>Temporada: ${p.temporada}</small><br>
-      <small>Campeonato: ${p.campeonato}</small>
-      <br><br>
-
-      <button onclick="FS.partidos.entrarPartido('${id}')">▶ Entrar</button>
-      <button onclick="FS.partidos.detalles('${id}')">👁 Ver sets</button>
-      <button onclick="FS.partidos.borrar('${id}')">🗑 Borrar</button>
+      <strong>${p.equipoNombre}</strong> · vs ${p.rival}<br>
+      <small>${p.categoria} · ${p.temporada} · ${p.fechaTexto}</small>
+      <div class="item-actions">
+        <button data-id="${p.id}" class="btn-delete">🗑</button>
+      </div>
     `;
 
     cont.appendChild(div);
   });
+
+  cont.querySelectorAll(".btn-delete").forEach(b =>
+    b.onclick = () => FS.partidos.borrar(b.dataset.id)
+  );
 };
 
 
 /* ============================================================
-   CREAR PARTIDO
+   CREAR PARTIDO (MODAL)
    ============================================================ */
 
 FS.partidos.create = function () {
+  const equipos = FS.state.equipos || {};
 
-  const equipos = FS.state.equipos;
   let opts = "";
-
-  Object.values(equipos).forEach(eq => {
-    opts += `<option value="${eq.id}">${eq.nombre} (${eq.temporada})</option>`;
+  Object.values(equipos).forEach(e => {
+    opts += `<option value="${e.id}">${e.nombre}</option>`;
   });
-
-  const hoy = new Date().toISOString().slice(0,10);
 
   const form = `
     <h3>Nuevo partido</h3>
 
-    <label>Equipo propio</label>
+    <label>Equipo</label>
     <select id="fp-equipo">${opts}</select>
 
-    <label>Equipo rival</label>
+    <label>Rival</label>
     <input id="fp-rival" type="text">
 
-    <label>Fecha</label>
-    <input id="fp-fecha" type="date" value="${hoy}">
-
     <label>Categoría</label>
-    <select id="fp-cat">
-      <option value=""></option>
-      <option value="Benjamín">Benjamín</option>
-      <option value="Alevín">Alevín</option>
-      <option value="Infantil">Infantil</option>
-      <option value="Cadete">Cadete</option>
-      <option value="Juvenil">Juvenil</option>
-      <option value="Senior">Senior</option>
-    </select>
+    <input id="fp-cat" type="text">
 
     <label>Temporada</label>
-    <input id="fp-temp" type="text" placeholder="Ej: 25/26">
+    <input id="fp-temp" type="text" placeholder="25/26">
 
-    <label>Campeonato</label>
-    <input id="fp-camp" type="text" placeholder="Ej: Liga Municipal">
+    <label>Fecha y hora</label>
+    <input id="fp-fecha" type="datetime-local">
 
     <br>
-    <button onclick="FS.partidos.submitCreate()">Guardar</button>
-    <button onclick="FS.modal.close()">Cancelar</button>
+    <button id="fp-save" class="btn">Guardar</button>
+    <button id="fp-cancel" class="btn-secondary">Cancelar</button>
   `;
 
   FS.modal.open(form);
+
+  setTimeout(() => {
+    document.getElementById("fp-save").onclick = FS.partidos.submitCreate;
+    document.getElementById("fp-cancel").onclick = FS.modal.close;
+  }, 20);
 };
 
-FS.partidos.submitCreate = function () {
-  const eq = document.getElementById("fp-equipo").value;
+
+FS.partidos.submitCreate = async function () {
+  const equipoId = document.getElementById("fp-equipo").value;
   const rival = document.getElementById("fp-rival").value.trim();
-  const fecha = document.getElementById("fp-fecha").value;
-  const categoria = document.getElementById("fp-cat").value;
+  const categoria = document.getElementById("fp-cat").value.trim();
   const temporada = document.getElementById("fp-temp").value.trim();
-  const campeonato = document.getElementById("fp-camp").value.trim();
+  const fechaISO = document.getElementById("fp-fecha").value;
 
-  if (!eq || !rival || !temporada) {
-    alert("Equipo propio, rival y temporada son obligatorios.");
+  if (!equipoId || !rival || !temporada || !fechaISO) {
+    alert("Faltan datos obligatorios");
     return;
   }
 
-  FS.state.crearPartido(eq, rival, fecha, categoria, temporada, campeonato);
-
-  FS.storage.guardarTodo();
-  FS.modal.close();
-  FS.partidos.renderLista();
-};
-
-
-/* ============================================================
-   ENTRAR AL PARTIDO (Set 1)
-   ============================================================ */
-
-FS.partidos.entrarPartido = function (idPartido) {
-  FS.state.iniciarPartido(idPartido);
-
-  const p = FS.state.partidos[idPartido];
-
-  if (p.sets.length === 0) {
-    FS.state.iniciarSet(1);
-  }
-
-  const eq = FS.state.equipos[p.equipoPropio];
-  FS.sets.cargarJugadorasEquipo(eq);
-
-  document.getElementById("titulo-set").textContent =
-    `Set ${FS.state.setActivo} — ${eq.nombre}`;
-
-  FS.router.go("set");
-};
-
-
-/* ============================================================
-   DETALLES DE PARTIDO
-   ============================================================ */
-
-FS.partidos.detalles = function (idPartido) {
-  const p = FS.state.partidos[idPartido];
-
-  let msg = `Partido:\n${p.fecha}\n${p.campeonato}\n${p.temporada}\n\n`;
-  msg += `${FS.state.equipos[p.equipoPropio]?.nombre} vs ${p.equipoRival}\n\n`;
-
-  if (p.sets.length === 0) {
-    alert(msg + "Sin sets registrados.");
-    return;
-  }
-
-  p.sets.forEach(set => {
-    msg += `Set ${set.numero}: ${set.acciones.length} acciones\n`;
+  const equipo = FS.state.equipos[equipoId];
+  const fechaTexto = new Date(fechaISO).toLocaleString("es-ES", {
+    day: "2-digit", month: "2-digit", year: "2-digit",
+    hour: "2-digit", minute: "2-digit"
   });
 
-  alert(msg);
+  const id = "p_" + crypto.randomUUID();
+
+  const data = {
+    id,
+    equipoId,
+    equipoNombre: equipo.nombre,
+    rival,
+    categoria,
+    temporada,
+    fechaISO,
+    fechaTexto,
+    hasStats: false,
+    locked: false,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  const r = await FS.firebase.savePartido(id, data);
+  if (!r.ok) {
+    alert("Error guardando partido");
+    return;
+  }
+
+  FS.modal.close();
+  FS.partidos.onEnter();
 };
 
 
@@ -179,20 +163,15 @@ FS.partidos.detalles = function (idPartido) {
    BORRAR PARTIDO
    ============================================================ */
 
-FS.partidos.borrar = function (idPartido) {
+FS.partidos.borrar = async function (id) {
   if (!confirm("¿Eliminar este partido?")) return;
 
-  delete FS.state.partidos[idPartido];
+  const r = await FS.firebase.deletePartido(id);
+  if (!r.ok) {
+    alert("Error borrando partido");
+    return;
+  }
 
-  FS.storage.guardarTodo();
-  FS.partidos.renderLista();
-};
-
-
-/* ============================================================
-   HOOK DE ENTRADA
-   ============================================================ */
-
-FS.partidos.onEnter = function () {
-  FS.partidos.renderLista();
+  delete FS.state.partidos[id];
+  FS.partidos.render();
 };
