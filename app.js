@@ -24,9 +24,9 @@ const GROUPS = [
 ========================================= */
 //renderPlayers();
 
-renderGroups();
-refreshButtons();
-ajustarAlturaGrid();
+//renderGroups();
+//refreshButtons();
+//ajustarAlturaGrid();
 
 /* =========================================
    RENDER DE JUGADORAS
