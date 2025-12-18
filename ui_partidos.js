@@ -107,7 +107,61 @@ FS.partidos.render = function () {
       contPrep.appendChild(div);
     });
   }
-   
+
+   FS.partidos.edit = function (id) {
+  const p = FS.state.partidos[id];
+  if (!p) return;
+
+  FS.partidos.editingId = id;
+
+  const equipos = FS.state.equipos || {};
+  const idsEquipos = Object.keys(equipos);
+
+  let opts = "";
+  idsEquipos.forEach(eid => {
+    const e = equipos[eid];
+    const sel = eid === p.equipoId ? "selected" : "";
+    opts += `<option value="${eid}" ${sel}>${e.nombre}</option>`;
+  });
+
+  const form = `
+    <h3>Editar partido</h3>
+
+    <label>Equipo</label>
+    <select id="fp-equipo">${opts}</select>
+
+    <label>Rival</label>
+    <input id="fp-rival" type="text" value="${p.rival}">
+
+    <label>Categoría</label>
+    <select id="fp-cat">
+      ${["Benjamín","Alevín","Infantil","Cadete","Juvenil","Senior"]
+        .map(c => `<option ${c===p.categoria?"selected":""}>${c}</option>`)
+        .join("")}
+    </select>
+
+    <label>Temporada</label>
+    <input id="fp-temp" type="text" value="${p.temporada}">
+
+    <label>Fecha</label>
+    <input id="fp-fecha" type="date" value="${p.fechaISO}">
+
+    <br>
+    <button id="fp-save" class="btn">Guardar cambios</button>
+    <button id="fp-cancel" class="btn-secondary">Cancelar</button>
+  `;
+
+  FS.modal.open(form);
+
+  setTimeout(() => {
+    document.getElementById("fp-save").onclick = FS.partidos.submitCreate;
+    document.getElementById("fp-cancel").onclick = () => {
+      FS.partidos.editingId = null;
+      FS.modal.close();
+    };
+  }, 0);
+};
+
 /* ===========================
    ACCIONES
    =========================== */
@@ -205,7 +259,7 @@ FS.partidos.submitCreate = async function () {
   const equipo = FS.state.equipos[equipoId];
   const fechaTexto = new Date(fechaISO).toLocaleDateString("es-ES");
 
-  const id = "p_" + crypto.randomUUID();
+  const id = FS.partidos.editingId || ("p_" + crypto.randomUUID());
 
   const data = {
     id,
@@ -227,8 +281,12 @@ FS.partidos.submitCreate = async function () {
     return;
   }
 
-  FS.modal.close();
-  FS.partidos.onEnter();
+  await FS.firebase.savePartido(id, data);
+
+FS.partidos.editingId = null;
+FS.modal.close();
+FS.partidos.onEnter();
+
 };
 
 
