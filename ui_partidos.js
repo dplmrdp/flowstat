@@ -38,36 +38,63 @@ FS.partidos.onEnter = async function () {
 
 FS.partidos.render = function () {
   const cont = document.getElementById("lista-partidos");
-  cont.innerHTML = "";
+  if (!cont) return;
+
+  cont.innerHTML = `
+    <h3>Partidos con estadísticas</h3>
+    <div id="lista-partidos-stats" class="list"></div>
+
+    <h3 class="mt-2">Partidos preparados</h3>
+    <div id="lista-partidos-preparados" class="list"></div>
+  `;
 
   const partidos = Object.values(FS.state.partidos || {});
 
+  const conStats = partidos.filter(p => p.hasStats);
   const preparados = partidos.filter(p => !p.hasStats);
 
-  if (preparados.length === 0) {
-    cont.innerHTML = "<p class='helper'>No hay partidos preparados.</p>";
-    return;
+  const contStats = document.getElementById("lista-partidos-stats");
+  const contPrep = document.getElementById("lista-partidos-preparados");
+
+  /* ===========================
+     PARTIDOS CON ESTADÍSTICAS
+     =========================== */
+  if (conStats.length === 0) {
+    contStats.innerHTML = `<p class="helper">No hay partidos con estadísticas.</p>`;
+  } else {
+    conStats.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "partido-item";
+
+      div.innerHTML = `
+        <strong>${p.equipoNombre}</strong> · vs ${p.rival}<br>
+        <small>${p.categoria} · ${p.temporada} · ${p.fechaTexto}</small>
+      `;
+
+      contStats.appendChild(div);
+    });
   }
 
-  preparados.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "partido-item";
+  /* ===========================
+     PARTIDOS PREPARADOS
+     =========================== */
+  if (preparados.length === 0) {
+    contPrep.innerHTML = `<p class="helper">No hay partidos preparados.</p>`;
+  } else {
+    preparados.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "partido-item";
 
-    div.innerHTML = `
-      <strong>${p.equipoNombre}</strong> · vs ${p.rival}<br>
-      <small>${p.categoria} · ${p.temporada} · ${p.fechaTexto}</small>
-      <div class="item-actions">
-        <button data-id="${p.id}" class="btn-delete">🗑</button>
-      </div>
-    `;
+      div.innerHTML = `
+        <strong>${p.equipoNombre}</strong> · vs ${p.rival}<br>
+        <small>${p.categoria} · ${p.temporada} · ${p.fechaTexto}</small>
+      `;
 
-    cont.appendChild(div);
-  });
-
-  cont.querySelectorAll(".btn-delete").forEach(b =>
-    b.onclick = () => FS.partidos.borrar(b.dataset.id)
-  );
+      contPrep.appendChild(div);
+    });
+  }
 };
+
 
 
 /* ============================================================
