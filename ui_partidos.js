@@ -120,11 +120,11 @@ cont.querySelectorAll("[data-edit]").forEach(b => {
   b.onclick = () => FS.partidos.edit(b.dataset.edit);
 });
 
-cont.querySelectorAll("[data-live]").forEach(b => {
-  b.onclick = () => {
-    alert("Aquí iniciaremos la toma de datos live (PASO 3)");
-  };
-});
+b.onclick = () => {
+  FS.partidoSets.currentPartidoId = b.dataset.live;
+  FS.router.go("partido-sets");
+};
+
 
 cont.querySelectorAll("[data-stats]").forEach(b => {
   b.onclick = () => {
