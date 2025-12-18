@@ -36,7 +36,7 @@ FS.partidos.onEnter = async function () {
    RENDER PRINCIPAL
    ============================================================ */
 
-FS.partidos.render = function () {
+s.render = function () {
   const cont = document.getElementById("lista-partidos");
   if (!cont) return;
 
