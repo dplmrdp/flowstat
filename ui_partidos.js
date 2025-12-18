@@ -67,9 +67,16 @@ FS.partidos.render = function () {
       div.className = "partido-item";
 
       div.innerHTML = `
-        <strong>${p.equipoNombre}</strong> · vs ${p.rival}<br>
-        <small>${p.categoria} · ${p.temporada} · ${p.fechaTexto}</small>
-      `;
+  <strong>${p.equipoNombre}</strong> · vs ${p.rival}<br>
+  <small>${p.categoria} · ${p.temporada} · ${p.fechaTexto}</small>
+
+  <div class="item-actions">
+    <button class="btn-ghost" data-edit="${p.id}">✏️ Editar</button>
+    <button class="btn-ghost" data-stats="${p.id}">📊 Estadísticas</button>
+    <button class="btn-ghost" data-del="${p.id}">🗑️</button>
+  </div>
+`;
+
 
       contStats.appendChild(div);
     });
@@ -86,13 +93,45 @@ FS.partidos.render = function () {
       div.className = "partido-item";
 
       div.innerHTML = `
-        <strong>${p.equipoNombre}</strong> · vs ${p.rival}<br>
-        <small>${p.categoria} · ${p.temporada} · ${p.fechaTexto}</small>
-      `;
+  <strong>${p.equipoNombre}</strong> · vs ${p.rival}<br>
+  <small>${p.categoria} · ${p.temporada} · ${p.fechaTexto}</small>
+
+  <div class="item-actions">
+    <button class="btn-ghost" data-edit="${p.id}">✏️ Editar</button>
+    <button class="btn-ghost" data-live="${p.id}">▶️ Registrar</button>
+    <button class="btn-ghost" data-del="${p.id}">🗑️</button>
+  </div>
+`;
+
 
       contPrep.appendChild(div);
     });
   }
+   
+/* ===========================
+   ACCIONES
+   =========================== */
+
+cont.querySelectorAll("[data-del]").forEach(b => {
+  b.onclick = () => FS.partidos.borrar(b.dataset.del);
+});
+
+cont.querySelectorAll("[data-edit]").forEach(b => {
+  b.onclick = () => FS.partidos.edit(b.dataset.edit);
+});
+
+cont.querySelectorAll("[data-live]").forEach(b => {
+  b.onclick = () => {
+    alert("Aquí iniciaremos la toma de datos live (PASO 3)");
+  };
+});
+
+cont.querySelectorAll("[data-stats]").forEach(b => {
+  b.onclick = () => {
+    alert("Visualización de estadísticas (más adelante)");
+  };
+});
+  
 };
 
 
@@ -109,28 +148,38 @@ FS.partidos.create = function () {
     opts += `<option value="${e.id}">${e.nombre}</option>`;
   });
 
-  const form = `
-    <h3>Nuevo partido</h3>
+  const hoy = new Date().toISOString().slice(0,10);
 
-    <label>Equipo</label>
-    <select id="fp-equipo">${opts}</select>
+const form = `
+  <h3>Nuevo partido</h3>
 
-    <label>Rival</label>
-    <input id="fp-rival" type="text">
+  <label>Equipo</label>
+  <select id="fp-equipo">${opts}</select>
 
-    <label>Categoría</label>
-    <input id="fp-cat" type="text">
+  <label>Rival</label>
+  <input id="fp-rival" type="text">
 
-    <label>Temporada</label>
-    <input id="fp-temp" type="text" placeholder="25/26">
+  <label>Categoría</label>
+  <select id="fp-cat">
+    <option>Benjamín</option>
+    <option>Alevín</option>
+    <option>Infantil</option>
+    <option>Cadete</option>
+    <option>Juvenil</option>
+    <option>Senior</option>
+  </select>
 
-    <label>Fecha y hora</label>
-    <input id="fp-fecha" type="datetime-local">
+  <label>Temporada</label>
+  <input id="fp-temp" type="text" placeholder="25/26">
 
-    <br>
-    <button id="fp-save" class="btn">Guardar</button>
-    <button id="fp-cancel" class="btn-secondary">Cancelar</button>
-  `;
+  <label>Fecha</label>
+  <input id="fp-fecha" type="date" value="${hoy}">
+
+  <br>
+  <button id="fp-save" class="btn">Guardar</button>
+  <button id="fp-cancel" class="btn-secondary">Cancelar</button>
+`;
+
 
   FS.modal.open(form);
 
@@ -154,10 +203,7 @@ FS.partidos.submitCreate = async function () {
   }
 
   const equipo = FS.state.equipos[equipoId];
-  const fechaTexto = new Date(fechaISO).toLocaleString("es-ES", {
-    day: "2-digit", month: "2-digit", year: "2-digit",
-    hour: "2-digit", minute: "2-digit"
-  });
+  const fechaTexto = new Date(fechaISO).toLocaleDateString("es-ES");
 
   const id = "p_" + crypto.randomUUID();
 
