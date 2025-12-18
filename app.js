@@ -32,7 +32,9 @@ ajustarAlturaGrid();
    RENDER DE JUGADORAS
 ========================================= */
 function renderPlayers(){
-  const container = document.getElementById("players");
+  const container = document.getElementById("players-container");
+if (!container) return;
+
   container.innerHTML = "";
 
   for (let i=1; i<=6; i++){
