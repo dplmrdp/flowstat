@@ -22,7 +22,8 @@ const GROUPS = [
 /* =========================================
    INIT
 ========================================= */
-renderPlayers();
+//renderPlayers();
+
 renderGroups();
 refreshButtons();
 ajustarAlturaGrid();
