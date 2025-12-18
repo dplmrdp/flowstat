@@ -1,6 +1,5 @@
 /* ============================================================
    ROUTER – Controlador de vistas del SPA FlowStat
-   Cambia pantallas y ejecuta hooks onEnter
    ============================================================ */
 
 window.FS = window.FS || {};
@@ -11,13 +10,21 @@ FS.router = {
 
   go(viewName) {
 
-    // Ocultar vista actual
-    const prev = document.getElementById(`view-${this.currentView}`);
-    if (prev) prev.classList.add("hidden");
+    // Ocultar TODAS las vistas y limpiar estado
+    document.querySelectorAll(".view").forEach(v => {
+      v.classList.add("hidden");
+      v.classList.remove("active");
+    });
 
     // Mostrar nueva vista
     const next = document.getElementById(`view-${viewName}`);
-    if (next) next.classList.remove("hidden");
+    if (!next) {
+      console.warn(`Vista no encontrada: view-${viewName}`);
+      return;
+    }
+
+    next.classList.remove("hidden");
+    next.classList.add("active");
 
     this.currentView = viewName;
 
@@ -25,16 +32,9 @@ FS.router = {
     // Ejecutar hook de entrada
     // ==============================
 
-    if (viewName === "jugadoras" && FS.jugadoras.onEnter)
-      FS.jugadoras.onEnter();
-
-    if (viewName === "equipos" && FS.equipos.onEnter)
-      FS.equipos.onEnter();
-
-    if (viewName === "partidos" && FS.partidos.onEnter)
-      FS.partidos.onEnter();
-
-    if (viewName === "set" && FS.sets.onEnter)
-      FS.sets.onEnter();
+    const mod = FS[viewName];
+    if (mod && typeof mod.onEnter === "function") {
+      mod.onEnter();
+    }
   }
 };
