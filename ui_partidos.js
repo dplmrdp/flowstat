@@ -122,7 +122,7 @@ cont.querySelectorAll("[data-edit]").forEach(b => {
 
 b.onclick = () => {
   FS.partidoSets.currentPartidoId = b.dataset.live;
-  FS.router.go("partido-sets");
+  FS.router.go("partidoSets");
 };
 
 
