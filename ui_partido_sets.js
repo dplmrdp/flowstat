@@ -12,15 +12,25 @@ FS.partidoSets.currentPartidoId = null;
    ENTRADA A LA VISTA
    ============================================================ */
 FS.partidoSets.onEnter = async function () {
+
   const pid = FS.partidoSets.currentPartidoId;
-  if (!pid) return;
+  if (!pid) {
+    console.warn("No hay partido activo para mostrar resumen");
+    FS.router.go("partidos");
+    return;
+  }
 
   const partido = FS.state.partidos[pid];
-  if (!partido) return;
+  if (!partido) {
+    console.warn("Partido no encontrado:", pid);
+    FS.router.go("partidos");
+    return;
+  }
 
   FS.partidoSets.renderPartido(partido);
   await FS.partidoSets.renderSets(pid);
 };
+
 
 /* ============================================================
    RENDER INFO PARTIDO
