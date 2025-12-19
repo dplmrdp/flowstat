@@ -12,6 +12,8 @@ FS.sets = FS.sets || {};
 FS.sets.onEnter = function () {
   FS.sets.bindButtons();
   FS.sets.render();
+  FS.setConfig.loadCourt();
+
 };
 
 /* ============================================================
