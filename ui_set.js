@@ -58,3 +58,23 @@ FS.sets.render = function () {
   players.innerHTML = "<em>Jugadoras en pista</em>";
   groups.innerHTML = "<em>Acciones del set</em>";
 };
+
+/* ============================================================
+   CINFIG?
+   ============================================================ */
+FS.setConfig = FS.setConfig || {};
+
+FS.setConfig.loadCourt = async function () {
+  const cont = document.getElementById("live-court");
+  if (!cont) return;
+
+  try {
+    const r = await fetch("/assets/svg/volcourt.svg");
+    const svgText = await r.text();
+    cont.innerHTML = svgText;
+  } catch (e) {
+    console.error("Error cargando SVG del campo", e);
+    cont.innerHTML = "<p>Error cargando campo</p>";
+  }
+};
+
