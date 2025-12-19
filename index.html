@@ -74,20 +74,42 @@
     </section>
 
     <!-- SET (LIVE) -->
-    <section id="view-set" class="view hidden">
-      <h2 id="titulo-set">Set</h2>
+    <section id="view-set" class="view hidden live-config">
 
-      <div class="top-row">
-        <div class="players" id="players-container"></div>
-        <button id="btn-change" class="action-btn">Cambiar</button>
-        <button id="btn-finish" class="action-btn">Finalizar set</button>
-        <div id="undo-container"></div>
-      </div>
+  <!-- CABECERA: modo de estadísticas -->
+  <div class="live-header">
+    Estadísticas por
+    <select id="stat-by">
+      <option value="equipo">equipo</option>
+      <option value="jugadora">jugadora</option>
+    </select>
 
-      <div class="groups" id="groups-container"></div>
+    en modo
+    <select id="stat-mode">
+      <option value="completo">completo</option>
+      <option value="reducido">reducido</option>
+    </select>
 
-      <button onclick="FS.router.go('partidos')">🔙 Volver</button>
-    </section>
+    <button id="btn-go-live" class="btn-live">▶ LIVE</button>
+  </div>
+
+  <!-- CUERPO -->
+  <div class="live-body">
+
+    <!-- JUGADORAS -->
+    <div class="live-players" id="live-players">
+      <!-- aquí pintaremos las jugadoras -->
+    </div>
+
+    <!-- CAMPO SVG -->
+    <div class="live-court" id="live-court">
+      <!-- aquí se carga /assets/svg/volcourt.svg -->
+    </div>
+
+  </div>
+
+</section>
+
 
     <!-- MODAL -->
     <div id="modal-bg" class="hidden modal-bg">
